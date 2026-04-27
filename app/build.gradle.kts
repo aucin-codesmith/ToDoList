@@ -4,6 +4,11 @@ plugins {
 
 android {
     namespace = "com.app.todolist"
+
+    buildFeatures {
+        viewBinding = true
+    }
+
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
