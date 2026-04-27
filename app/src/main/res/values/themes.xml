@@ -1,8 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.ToDoList" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!-- Splash Theme (taruh di dalam tag <resources>) -->
+    <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/bg_splash_gradient</item>
+        <item name="android:statusBarColor">#A78BF5</item>
+        <item name="android:navigationBarColor">#7C4FD4</item>
+        <item name="android:windowFullscreen">false</item>
     </style>
 
     <style name="Theme.ToDoList" parent="Base.Theme.ToDoList" />
