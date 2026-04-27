@@ -2,4 +2,67 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Primary -->
+    <color name="primary">#6C42BD</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#855CD7</color>
+    <color name="on_primary_container">#FFFBFF</color>
+    <color name="primary_fixed">#EADDFF</color>
+    <color name="primary_fixed_dim">#D2BBFF</color>
+    <color name="on_primary_fixed">#25005A</color>
+    <color name="on_primary_fixed_variant">#5628A6</color>
+    <color name="inverse_primary">#D2BBFF</color>
+
+    <!-- Secondary -->
+    <color name="secondary">#4648D4</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="secondary_container">#6063EE</color>
+    <color name="on_secondary_container">#FFFBFF</color>
+    <color name="secondary_fixed">#E1E0FF</color>
+    <color name="secondary_fixed_dim">#C0C1FF</color>
+    <color name="on_secondary_fixed">#07006C</color>
+    <color name="on_secondary_fixed_variant">#2F2EBE</color>
+
+    <!-- Tertiary -->
+    <color name="tertiary">#6448B3</color>
+    <color name="on_tertiary">#FFFFFF</color>
+    <color name="tertiary_container">#7E62CE</color>
+    <color name="on_tertiary_container">#FFFBFF</color>
+    <color name="tertiary_fixed">#E8DDFF</color>
+    <color name="tertiary_fixed_dim">#CEBDFF</color>
+    <color name="on_tertiary_fixed">#21005E</color>
+    <color name="on_tertiary_fixed_variant">#4F319C</color>
+
+    <!-- Error -->
+    <color name="error">#BA1A1A</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="error_container">#FFDAD6</color>
+    <color name="on_error_container">#93000A</color>
+
+    <!-- Surface -->
+    <color name="background">#FEF7FF</color>
+    <color name="on_background">#1D1A22</color>
+    <color name="surface">#FEF7FF</color>
+    <color name="on_surface">#1D1A22</color>
+    <color name="surface_variant">#E7E0EB</color>
+    <color name="on_surface_variant">#4A4453</color>
+    <color name="surface_bright">#FEF7FF</color>
+    <color name="surface_dim">#DED8E3</color>
+    <color name="surface_tint">#6E44BF</color>
+    <color name="surface_container_lowest">#FFFFFF</color>
+    <color name="surface_container_low">#F8F1FC</color>
+    <color name="surface_container">#F3EBF7</color>
+    <color name="surface_container_high">#EDE6F1</color>
+    <color name="surface_container_highest">#E7E0EB</color>
+    <color name="inverse_surface">#322F37</color>
+    <color name="inverse_on_surface">#F6EEF9</color>
+
+    <!-- Outline -->
+    <color name="outline">#7B7484</color>
+    <color name="outline_variant">#CCC3D5</color>
+
+    <!-- Brand Purple (used in buttons & icon) -->
+    <color name="brand_purple">#9067E3</color>
+    <color name="brand_purple_dark">#7E56D4</color>
 </resources>
