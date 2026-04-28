@@ -6,15 +6,15 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.TaskListAdapter
 import com.app.todolist.databinding.ActivityTaskListBinding
 import com.app.todolist.model.TaskItem
-import com.app.todolist.ui.tasklist.DetailTaskActivity
+import com.app.todolist.ui.add.AddTaskActivity
 import com.app.todolist.ui.home.HomeActivity
+import com.app.todolist.ui.profile.ProfileActivity
 
 class TaskListActivity : AppCompatActivity() {
 
@@ -67,11 +67,8 @@ class TaskListActivity : AppCompatActivity() {
         selectFilter(FilterType.ACTIVE)
     }
 
-    // ── Refresh list after returning from DetailTaskActivity ──────────────────
-
     override fun onResume() {
         super.onResume()
-        // Re-apply filter so any status changes from DetailTaskActivity are reflected
         applyFilter()
     }
 
@@ -81,12 +78,10 @@ class TaskListActivity : AppCompatActivity() {
         adapter = TaskListAdapter(
             tasks = mutableListOf(),
             onCheckedChange = { task, isChecked ->
-                // Toggle completion state
                 allTasks.find { it.id == task.id }?.isCompleted = isChecked
                 applyFilter()
             },
             onItemClick = { task ->
-                // Navigate to DetailTaskActivity with full task data
                 openDetailTask(task)
             }
         )
@@ -117,7 +112,7 @@ class TaskListActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
-            startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
+            startActivity(Intent(this, AddTaskActivity::class.java))
         }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
@@ -127,13 +122,13 @@ class TaskListActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_tasks   -> true
+                R.id.nav_tasks -> true
                 R.id.nav_add -> {
-                    startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
+                    startActivity(Intent(this, AddTaskActivity::class.java))
                     true
                 }
                 R.id.nav_profile -> {
-                    Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }
                 else -> false

@@ -1,8 +1,7 @@
 package com.app.todolist.ui.home
 
-import android.content.Intent // ✅ TAMBAHAN IMPORT
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
@@ -10,7 +9,9 @@ import com.app.todolist.adapter.TaskAdapter
 import com.app.todolist.databinding.ActivityMainBinding
 import com.app.todolist.model.Priority
 import com.app.todolist.model.Task
-import com.app.todolist.ui.tasklist.TaskListActivity // ✅ IMPORT BARU
+import com.app.todolist.ui.add.AddTaskActivity
+import com.app.todolist.ui.profile.ProfileActivity
+import com.app.todolist.ui.tasklist.TaskListActivity
 
 class HomeActivity : AppCompatActivity() {
 
@@ -56,35 +57,33 @@ class HomeActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
-            startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
+            startActivity(Intent(this, AddTaskActivity::class.java))
         }
 
-        //  UPDATE 1: tvSeeAll
         binding.tvSeeAll.setOnClickListener {
             startActivity(Intent(this, TaskListActivity::class.java))
         }
 
         binding.cvAvatar.setOnClickListener {
-            Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> true
 
-                // UPDATE 2: nav_tasks
                 R.id.nav_tasks -> {
                     startActivity(Intent(this, TaskListActivity::class.java))
                     true
                 }
 
                 R.id.nav_add -> {
-                    startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
+                    startActivity(Intent(this, AddTaskActivity::class.java))
                     true
                 }
 
                 R.id.nav_profile -> {
-                    Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, ProfileActivity::class.java))
                     true
                 }
 
