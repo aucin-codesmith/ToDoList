@@ -5,6 +5,7 @@ data class TaskItem(
     val title: String,
     val category: String,
     val dateTime: String,
+    val priority: String = "Sedang", // "Tinggi", "Sedang", "Rendah"
     val assigneeTag: String? = null,
     var isCompleted: Boolean = false
 )

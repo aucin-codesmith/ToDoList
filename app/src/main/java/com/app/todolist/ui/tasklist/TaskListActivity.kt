@@ -22,11 +22,11 @@ class TaskListActivity : AppCompatActivity() {
 
     // ── Sample data (replace with ViewModel + Repository later) ──────────────
     private val allTasks = mutableListOf(
-        TaskItem(1, "Desain Prototipe Mobile App", "Work",        "Hari ini, 14:00", "KMP"),
-        TaskItem(2, "Review Laporan Mingguan",      "Management",  "Besok, 09:00"),
-        TaskItem(3, "Update Dokumentasi API",       "Development", "Hari ini, 16:00", "DEV"),
-        TaskItem(4, "Sprint Planning Q2",           "Management",  "Besok, 10:00"),
-        TaskItem(5, "Desain Komponen UI",           "Design",      "Besok, 13:00",    "KMP"),
+        TaskItem(1, "Desain Prototipe Mobile App", "Work",        "Hari ini, 14:00", priority = "Tinggi",  assigneeTag = "KMP"),
+        TaskItem(2, "Review Laporan Mingguan",      "Management",  "Besok, 09:00",    priority = "Sedang"),
+        TaskItem(3, "Update Dokumentasi API",       "Development", "Hari ini, 16:00", priority = "Rendah",  assigneeTag = "DEV"),
+        TaskItem(4, "Sprint Planning Q2",           "Management",  "Besok, 10:00",    priority = "Tinggi"),
+        TaskItem(5, "Desain Komponen UI",           "Design",      "Besok, 13:00",    priority = "Sedang",  assigneeTag = "KMP"),
     )
 
     private var currentFilter = FilterType.ACTIVE
@@ -80,12 +80,6 @@ class TaskListActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        binding.ivMenu.setOnClickListener {
-            Toast.makeText(this, "Menu", Toast.LENGTH_SHORT).show()
-        }
-        binding.ivAvatar.setOnClickListener {
-            Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show()
-        }
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
         }
@@ -126,7 +120,6 @@ class TaskListActivity : AppCompatActivity() {
             binding.btnFilterCompleted to FilterType.COMPLETED,
             binding.btnFilterAll       to FilterType.ALL
         ).forEach { (tv, type) ->
-            // Safe cast — in XML these are now TextView, not Button
             val textView = tv as TextView
             if (type == currentFilter) {
                 textView.setBackgroundResource(R.drawable.bg_filter_selected)
