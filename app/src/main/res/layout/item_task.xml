@@ -7,7 +7,8 @@
     android:layout_marginBottom="10dp"
     app:cardCornerRadius="14dp"
     app:cardBackgroundColor="@color/surface_container_lowest"
-    app:cardElevation="2dp">
+    app:cardElevation="2dp"
+    app:cardPreventCornerOverlap="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,14 +20,16 @@
         android:paddingTop="14dp"
         android:paddingBottom="14dp">
 
-        <com.google.android.material.checkbox.MaterialCheckBox
+        <!-- Checkbox -->
+        <CheckBox
             android:id="@+id/cbTask"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
-            app:buttonTint="@color/brand_purple"
+            android:buttonTint="@color/brand_purple"
             android:padding="0dp" />
 
+        <!-- Task info: title + date + priority -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,10 +39,12 @@
                 android:id="@+id/tvTaskTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Task Title"
                 android:textSize="15sp"
                 android:textColor="@color/on_surface"
                 android:fontFamily="sans-serif-medium" />
 
+            <!-- Date + priority row -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,8 +64,23 @@
                     android:id="@+id/tvTaskDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="14 Okt, 2023"
                     android:textSize="12sp"
                     android:textColor="@color/on_surface_variant" />
+
+                <!-- Priority chip -->
+                <TextView
+                    android:id="@+id/tvPriority"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="TINGGI"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp" />
 
             </LinearLayout>
         </LinearLayout>

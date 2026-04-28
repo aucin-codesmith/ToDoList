@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.TaskAdapter
 import com.app.todolist.databinding.ActivityMainBinding
+import com.app.todolist.model.Priority
 import com.app.todolist.model.Task
 import com.app.todolist.ui.tasklist.TaskListActivity // ✅ IMPORT BARU
 
@@ -17,9 +18,9 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var taskAdapter: TaskAdapter
 
     private val tasks = mutableListOf(
-        Task(1, "Review Design System",  "14 Okt, 2023"),
-        Task(2, "Daily Standup Meeting", "14 Okt, 2023", isCompleted = true),
-        Task(3, "Beli Bahan Makanan",    "15 Okt, 2023"),
+        Task(1, "Review Design System",   "14 Okt, 2023", Priority.TINGGI),
+        Task(2, "Daily Standup Meeting",  "14 Okt, 2023", Priority.MEDIUM, isCompleted = true),
+        Task(3, "Beli Bahan Makanan",     "15 Okt, 2023", Priority.RENDAH),
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {

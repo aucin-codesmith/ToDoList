@@ -25,10 +25,40 @@ class AddTaskActivity : AppCompatActivity() {
         binding = ActivityAddTaskBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupPriorityToggle()
         setupDeadlinePicker()
         setupSaveButton()
         setupBottomNav()
 
+        // Set default priority
+        selectPriority("Sedang")
+    }
+    // ── Priority Toggle ───────────────────────────────────────────────────────
+
+    private fun setupPriorityToggle() {
+        binding.btnPriorityLow.setOnClickListener  { selectPriority("Rendah") }
+        binding.btnPriorityMed.setOnClickListener  { selectPriority("Sedang") }
+        binding.btnPriorityHigh.setOnClickListener { selectPriority("Tinggi") }
+    }
+
+    private fun selectPriority(priority: String) {
+        selectedPriority = priority
+
+        val buttons = listOf(
+            binding.btnPriorityLow  to "Rendah",
+            binding.btnPriorityMed  to "Sedang",
+            binding.btnPriorityHigh to "Tinggi"
+        )
+
+        buttons.forEach { (btn, label) ->
+            if (label == priority) {
+                btn.setBackgroundResource(R.drawable.bg_filter_selected)
+                btn.setTextColor(getColor(R.color.white))
+            } else {
+                btn.setBackgroundResource(0)
+                btn.setTextColor(getColor(R.color.on_surface_variant))
+            }
+        }
     }
 
 

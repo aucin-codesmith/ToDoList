@@ -66,4 +66,9 @@
     <color name="brand_purple">#9067E3</color>
     <color name="brand_purple_dark">#7E56D4</color>
 
+    <!-- Priority colour -->
+    <color name="priority_high">#D32F2F</color>
+    <color name="priority_medium">#00796B</color>
+    <color name="priority_low">#2E7D32</color>
+
 </resources>
