@@ -13,7 +13,8 @@ import com.app.todolist.model.TaskItem
 
 class TaskListAdapter(
     private val tasks: MutableList<TaskItem>,
-    private val onCheckedChange: (TaskItem, Boolean) -> Unit
+    private val onCheckedChange: (TaskItem, Boolean) -> Unit,
+    private val onItemClick: (TaskItem) -> Unit              // ← tambahan
 ) : RecyclerView.Adapter<TaskListAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemTaskListBinding) :
@@ -76,13 +77,18 @@ class TaskListAdapter(
             tvPriority.alpha = alpha
             tvDateTime.alpha = alpha
 
-            // ── Checkbox ──────────────────────────────────────────────────────
+            // ── Checkbox — hanya toggle status, tidak buka detail ─────────────
             cbTask.setOnCheckedChangeListener(null)
             cbTask.isChecked = task.isCompleted
             cbTask.setOnCheckedChangeListener { _, isChecked ->
                 task.isCompleted = isChecked
                 onCheckedChange(task, isChecked)
                 notifyItemChanged(position)
+            }
+
+            // ── Klik card → buka DetailTaskActivity ───────────────────────────
+            root.setOnClickListener {
+                onItemClick(task)
             }
         }
     }
@@ -118,17 +124,14 @@ class TaskListAdapter(
         ctx: android.content.Context
     ): Pair<Int, Int> = when (priority.lowercase()) {
         "tinggi" -> Pair(
-            // Red-tinted for high priority
             android.graphics.Color.parseColor("#FFDAD6"),
             android.graphics.Color.parseColor("#BA1A1A")
         )
         "rendah" -> Pair(
-            // Green-tinted for low priority
             android.graphics.Color.parseColor("#C8F0D8"),
             android.graphics.Color.parseColor("#1A6B3A")
         )
         else -> Pair(
-            // Yellow for medium (Sedang) - matches sketch
             android.graphics.Color.parseColor("#FFF0C2"),
             android.graphics.Color.parseColor("#7A5900")
         )

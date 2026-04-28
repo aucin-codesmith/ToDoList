@@ -13,6 +13,7 @@ import com.app.todolist.R
 import com.app.todolist.adapter.TaskListAdapter
 import com.app.todolist.databinding.ActivityTaskListBinding
 import com.app.todolist.model.TaskItem
+import com.app.todolist.ui.tasklist.DetailTaskActivity
 import com.app.todolist.ui.home.HomeActivity
 
 class TaskListActivity : AppCompatActivity() {
@@ -22,9 +23,29 @@ class TaskListActivity : AppCompatActivity() {
 
     // ── Sample data (replace with ViewModel + Repository later) ──────────────
     private val allTasks = mutableListOf(
-        TaskItem(1, "Desain Prototipe Mobile App", "Work",        "Hari ini, 14:00", priority = "Tinggi",  assigneeTag = "KMP"),
-        TaskItem(2, "Review Laporan Mingguan",      "Management",  "Besok, 09:00",    priority = "Sedang"),
-        TaskItem(3, "Update Dokumentasi API",       "Development", "Hari ini, 16:00", priority = "Rendah",  assigneeTag = "DEV"),
+        TaskItem(
+            1,
+            "Desain Prototipe Mobile App",
+            "Work",
+            "Mengembangkan prototipe high-fidelity menggunakan Figma yang mencakup alur registrasi pengguna, dasbor utama, dan visualisasi pengeluaran bulanan",
+            "Hari ini, 14:00",
+            priority = "Tinggi",
+            assigneeTag = "KMP"),
+        TaskItem(
+            2,
+            "Review Laporan Mingguan",
+            "Management",
+            "Melakukan audit terhadap laporan progres mingguan untuk memastikan pencapaian KPI dan mengidentifikasi hambatan teknis (blockers) pada sisi backend.",
+            "Besok, 09:00",
+            priority = "Sedang"),
+        TaskItem(
+            3,
+            "Update Dokumentasi API",
+            "Development",
+            "Memperbarui referensi endpoint pada Swagger/Postman untuk mencerminkan perubahan skema database dan penambahan fitur autentikasi OAuth2.",
+            "Hari ini, 16:00",
+            priority = "Rendah",
+            assigneeTag = "DEV"),
     )
 
     private var currentFilter = FilterType.ACTIVE
@@ -46,13 +67,30 @@ class TaskListActivity : AppCompatActivity() {
         selectFilter(FilterType.ACTIVE)
     }
 
+    // ── Refresh list after returning from DetailTaskActivity ──────────────────
+
+    override fun onResume() {
+        super.onResume()
+        // Re-apply filter so any status changes from DetailTaskActivity are reflected
+        applyFilter()
+    }
+
     // ── Setup ─────────────────────────────────────────────────────────────────
 
     private fun setupRecyclerView() {
-        adapter = TaskListAdapter(mutableListOf()) { task, isChecked ->
-            allTasks.find { it.id == task.id }?.isCompleted = isChecked
-            applyFilter()
-        }
+        adapter = TaskListAdapter(
+            tasks = mutableListOf(),
+            onCheckedChange = { task, isChecked ->
+                // Toggle completion state
+                allTasks.find { it.id == task.id }?.isCompleted = isChecked
+                applyFilter()
+            },
+            onItemClick = { task ->
+                // Navigate to DetailTaskActivity with full task data
+                openDetailTask(task)
+            }
+        )
+
         binding.rvTasks.apply {
             layoutManager            = LinearLayoutManager(this@TaskListActivity)
             adapter                  = this@TaskListActivity.adapter
@@ -102,6 +140,21 @@ class TaskListActivity : AppCompatActivity() {
             }
         }
         binding.bottomNav.selectedItemId = R.id.nav_tasks
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+
+    private fun openDetailTask(task: TaskItem) {
+        val intent = Intent(this, DetailTaskActivity::class.java).apply {
+            putExtra(DetailTaskActivity.EXTRA_TASK_ID,        task.id)
+            putExtra(DetailTaskActivity.EXTRA_TASK_TITLE,     task.title)
+            putExtra(DetailTaskActivity.EXTRA_TASK_STATUS,    if (task.isCompleted) "selesai" else "belum_selesai")
+            putExtra(DetailTaskActivity.EXTRA_TASK_KATEGORI,  task.category)
+            putExtra(DetailTaskActivity.EXTRA_TASK_DEADLINE,  task.dateTime)
+            putExtra(DetailTaskActivity.EXTRA_TASK_PRIORITAS, task.priority)
+            putExtra(DetailTaskActivity.EXTRA_TASK_DESKRIPSI, task.description ?: "-")
+        }
+        startActivity(intent)
     }
 
     // ── Filter logic ──────────────────────────────────────────────────────────

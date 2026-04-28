@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- Top App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@color/primary"
+            app:title="Detail Tugas"
+            app:titleTextColor="@color/primary"
+            app:titleTextAppearance="@style/TextAppearance.ToDoList.Toolbar" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Scrollable content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="160dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Title Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="@color/surface_container_lowest"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/tv_task_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Review Desain TaskFlow Mobile"
+                        android:textColor="@color/on_surface"
+                        android:textSize="22sp"
+                        android:fontFamily="poppins_semi_bold"
+                        android:lineSpacingMultiplier="1.2" />
+
+                    <!-- Status Chip -->
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Belum Selesai"
+                        android:textColor="@color/primary"
+                        android:textSize="13sp"
+                        android:fontFamily="inter_medium"
+                        app:chipBackgroundColor="@color/primary_fixed"
+                        app:chipStrokeWidth="0dp"
+                        app:chipMinHeight="32dp"
+                        style="@style/Widget.Material3.Chip.Suggestion" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Kategori Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_kategori"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="@color/surface_container_lowest"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+
+                    <!-- Icon background circle -->
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_icon_circle">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_label"
+                            android:tint="@color/primary"
+                            android:contentDescription="@null" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="KATEGORI"
+                            android:textColor="@color/on_surface_variant"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.08"
+                            android:fontFamily="inter_medium" />
+
+                        <TextView
+                            android:id="@+id/tv_kategori"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Proyek Desain"
+                            android:textColor="@color/on_surface"
+                            android:textSize="16sp"
+                            android:fontFamily="inter_semi_bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Deadline Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_deadline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="@color/surface_container_lowest"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_icon_circle">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_calendar"
+                            app:tint="@color/primary"
+                            android:contentDescription="@null" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DEADLINE"
+                            android:textColor="@color/on_surface_variant"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.08"
+                            android:fontFamily="inter_medium" />
+
+                        <TextView
+                            android:id="@+id/tv_deadline"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="24 Okt 2023"
+                            android:textColor="@color/on_surface"
+                            android:textSize="16sp"
+                            android:fontFamily="inter_semi_bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Prioritas Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_prioritas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="@color/surface_container_lowest"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_icon_circle_error">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_priority_high"
+                            android:tint="@color/error"
+                            android:contentDescription="@null" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PRIORITAS"
+                            android:textColor="@color/on_surface_variant"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.08"
+                            android:fontFamily="inter_medium" />
+
+                        <TextView
+                            android:id="@+id/tv_prioritas"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Tinggi"
+                            android:textColor="@color/on_surface"
+                            android:textSize="16sp"
+                            android:fontFamily="inter_semi_bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Deskripsi Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_deskripsi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/surface_container_low"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Deskripsi"
+                        android:textColor="@color/on_surface_variant"
+                        android:textSize="13sp"
+                        android:fontFamily="inter_medium" />
+
+                    <TextView
+                        android:id="@+id/tv_deskripsi"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Menyelesaikan review komprehensif untuk antarmuka pengguna aplikasi TaskFlow. Fokus pada konsistensi warna violet, tipografi Inter, dan kemudahan navigasi bagi pengguna baru. Pastikan semua state (empty, error, success) sudah tercakup dalam file Figma."
+                        android:textColor="@color/on_surface"
+                        android:textSize="14sp"
+                        android:lineSpacingMultiplier="1.5"
+                        android:fontFamily="inter_regular" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Action Buttons — fixed at bottom -->
+    <LinearLayout
+        android:id="@+id/layout_bottom_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/background"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="24dp">
+
+        <!-- Tandai Selesai Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_tandai_selesai"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Tandai Selesai"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:fontFamily="inter_semi_bold"
+            app:backgroundTint="@color/brand_purple"
+            app:cornerRadius="16dp"
+            app:icon="@drawable/ic_check_circle"
+            app:iconTint="@color/white"
+            app:iconGravity="textStart"
+            app:iconSize="20dp"
+            app:iconPadding="8dp" />
+
+        <!-- Edit & Hapus Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Edit Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="Edit"
+                android:textColor="@color/on_surface"
+                android:textSize="15sp"
+                android:fontFamily="inter_semi_bold"
+                app:cornerRadius="16dp"
+                app:strokeColor="@color/outline_variant"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_edit"
+                app:iconTint="@color/on_surface"
+                app:iconGravity="textStart"
+                app:iconSize="18dp"
+                app:iconPadding="6dp" />
+
+            <!-- Hapus Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_hapus"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="Hapus"
+                android:textColor="@color/error"
+                android:textSize="15sp"
+                android:fontFamily="inter_semi_bold"
+                app:cornerRadius="16dp"
+                app:strokeColor="@color/outline_variant"
+                app:strokeWidth="1dp"
+                app:icon="@drawable/ic_delete"
+                app:iconTint="@color/error"
+                app:iconGravity="textStart"
+                app:iconSize="18dp"
+                app:iconPadding="6dp" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

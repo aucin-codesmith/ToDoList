@@ -51,6 +51,11 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".ui.tasklist.DetailTaskActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".ui.add.AddTaskActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

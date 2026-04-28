@@ -87,5 +87,11 @@
         <item name="android:insetBottom">0dp</item>
     </style>
 
+    <!-- Toolbar Title -->
+    <style name="TextAppearance.ToDoList.Toolbar" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@poppins_semi_bold</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
 
 </resources>
