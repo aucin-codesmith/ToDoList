@@ -25,8 +25,6 @@ class TaskListActivity : AppCompatActivity() {
         TaskItem(1, "Desain Prototipe Mobile App", "Work",        "Hari ini, 14:00", priority = "Tinggi",  assigneeTag = "KMP"),
         TaskItem(2, "Review Laporan Mingguan",      "Management",  "Besok, 09:00",    priority = "Sedang"),
         TaskItem(3, "Update Dokumentasi API",       "Development", "Hari ini, 16:00", priority = "Rendah",  assigneeTag = "DEV"),
-        TaskItem(4, "Sprint Planning Q2",           "Management",  "Besok, 10:00",    priority = "Tinggi"),
-        TaskItem(5, "Desain Komponen UI",           "Design",      "Besok, 13:00",    priority = "Sedang",  assigneeTag = "KMP"),
     )
 
     private var currentFilter = FilterType.ACTIVE
