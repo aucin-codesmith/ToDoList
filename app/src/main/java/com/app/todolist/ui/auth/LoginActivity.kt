@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.app.todolist.R
 import com.app.todolist.databinding.ActivityLoginBinding
 import com.google.android.material.textfield.TextInputLayout
+import android.content.Intent
+import com.app.todolist.ui.home.HomeActivity
 
 class LoginActivity : AppCompatActivity() {
 
@@ -92,14 +94,11 @@ class LoginActivity : AppCompatActivity() {
     // ─── Auth actions (UI-only placeholders) ──────────────────────────────────
 
     private fun performLogin() {
-        val email = binding.etEmail.text?.toString()?.trim().orEmpty()
-        // TODO: Integrate with your auth repository / ViewModel
         setLoginLoading(true)
-
-        // Placeholder — remove once auth is wired up
         binding.root.postDelayed({
             setLoginLoading(false)
-            Toast.makeText(this, "Login: $email", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
         }, 1_500)
     }
 
