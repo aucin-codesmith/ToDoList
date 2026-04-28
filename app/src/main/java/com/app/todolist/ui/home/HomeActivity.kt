@@ -55,7 +55,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
-            Toast.makeText(this, "Tambah tugas baru", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
         }
 
         //  UPDATE 1: tvSeeAll
@@ -78,7 +78,7 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_add -> {
-                    binding.fabAdd.performClick()
+                    startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
                     true
                 }
 

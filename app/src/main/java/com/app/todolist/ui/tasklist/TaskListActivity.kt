@@ -87,7 +87,7 @@ class TaskListActivity : AppCompatActivity() {
             Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show()
         }
         binding.fabAdd.setOnClickListener {
-            Toast.makeText(this, "Tambah tugas baru", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
         }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
@@ -98,7 +98,10 @@ class TaskListActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_tasks   -> true
-                R.id.nav_add     -> { binding.fabAdd.performClick(); true }
+                R.id.nav_add -> {
+                    startActivity(Intent(this, com.app.todolist.ui.add.AddTaskActivity::class.java))
+                    true
+                }
                 R.id.nav_profile -> {
                     Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show()
                     true
