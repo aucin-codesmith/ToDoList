@@ -1,5 +1,6 @@
 package com.app.todolist.ui.home
 
+import android.content.Intent // ✅ TAMBAHAN IMPORT
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -8,13 +9,13 @@ import com.app.todolist.R
 import com.app.todolist.adapter.TaskAdapter
 import com.app.todolist.databinding.ActivityMainBinding
 import com.app.todolist.model.Task
+import com.app.todolist.ui.tasklist.TaskListActivity // ✅ IMPORT BARU
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var taskAdapter: TaskAdapter
 
-    // Nanti diganti dengan ViewModel + Repository
     private val tasks = mutableListOf(
         Task(1, "Review Design System",  "14 Okt, 2023"),
         Task(2, "Daily Standup Meeting", "14 Okt, 2023", isCompleted = true),
@@ -54,13 +55,12 @@ class HomeActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
-            // TODO: Navigate to AddTaskActivity
             Toast.makeText(this, "Tambah tugas baru", Toast.LENGTH_SHORT).show()
         }
 
+        //  UPDATE 1: tvSeeAll
         binding.tvSeeAll.setOnClickListener {
-            // TODO: Navigate to AllTasksActivity
-            Toast.makeText(this, "Lihat semua tugas", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, TaskListActivity::class.java))
         }
 
         binding.cvAvatar.setOnClickListener {
@@ -69,11 +69,25 @@ class HomeActivity : AppCompatActivity() {
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home    -> true
-                R.id.nav_tasks   -> { Toast.makeText(this, "Tugas", Toast.LENGTH_SHORT).show(); true }
-                R.id.nav_add     -> { binding.fabAdd.performClick(); true }
-                R.id.nav_profile -> { Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show(); true }
-                else             -> false
+                R.id.nav_home -> true
+
+                // UPDATE 2: nav_tasks
+                R.id.nav_tasks -> {
+                    startActivity(Intent(this, TaskListActivity::class.java))
+                    true
+                }
+
+                R.id.nav_add -> {
+                    binding.fabAdd.performClick()
+                    true
+                }
+
+                R.id.nav_profile -> {
+                    Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show()
+                    true
+                }
+
+                else -> false
             }
         }
     }
