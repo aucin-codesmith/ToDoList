@@ -26,8 +26,12 @@
 
         </activity>
 
+        <!-- Auth Activity -->
         <activity
             android:name=".ui.auth.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.auth.RegisterActivity"
             android:exported="false" />
 
         <!-- MainActivity bukan lagi launcher -->

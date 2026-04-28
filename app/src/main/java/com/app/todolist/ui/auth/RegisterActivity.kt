@@ -7,18 +7,18 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.app.todolist.R
-import com.app.todolist.databinding.ActivityLoginBinding
+import com.app.todolist.databinding.ActivityRegisterBinding
 import com.google.android.material.textfield.TextInputLayout
 import android.content.Intent
 import com.app.todolist.ui.home.HomeActivity
 
-class LoginActivity : AppCompatActivity() {
+class RegisterActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityLoginBinding
+    private lateinit var binding: ActivityRegisterBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
+        binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setupInputListeners()
@@ -50,42 +50,82 @@ class LoginActivity : AppCompatActivity() {
     // ─── Click listeners ──────────────────────────────────────────────────────
 
     private fun setupClickListeners() {
-        binding.btnLogin.setOnClickListener {
+        binding.btnRegister.setOnClickListener {
             if (validateInputs()) {
-                performLogin()
+                performRegister()
             }
         }
 
-        binding.btnForgotPassword.setOnClickListener {
-            onForgotPasswordClicked()
-        }
-
-        binding.btnRegister.setOnClickListener {
-            onRegisterClicked()
+        binding.btnLogin.setOnClickListener {
+            onLoginClicked()
         }
     }
 
     // ─── Validation ───────────────────────────────────────────────────────────
 
     private fun validateInputs(): Boolean {
+        // Gunakan trim() untuk username dan email, tapi jangan untuk password
+        // karena spasi bisa jadi bagian dari password yang valid.
+        val username = binding.etUsername.text?.toString()?.trim().orEmpty()
         val email = binding.etEmail.text?.toString()?.trim().orEmpty()
         val password = binding.etPassword.text?.toString().orEmpty()
+        val confirmPassword = binding.etConfirmPassword.text?.toString().orEmpty()
+
         var isValid = true
 
-        if (email.isEmpty()) {
-            binding.tilEmail.error = "Email tidak boleh kosong"
-            isValid = false
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.tilEmail.error = "Format email tidak valid"
-            isValid = false
+        // Reset semua error terlebih dahulu agar tidak menumpuk
+        binding.tilUsername.error = null
+        binding.tilEmail.error = null
+        binding.tilPassword.error = null
+        binding.tilConfirmPassword.error = null
+
+        // Validasi Username
+        when {
+            username.isEmpty() -> {
+                binding.tilUsername.error = "Username tidak boleh kosong"
+                isValid = false
+            }
+            // Mengecek apakah username mengandung spasi
+            username.contains(" ") -> {
+                binding.tilUsername.error = "Username tidak boleh mengandung spasi"
+                isValid = false
+            }
         }
 
-        if (password.isEmpty()) {
-            binding.tilPassword.error = "Password tidak boleh kosong"
-            isValid = false
-        } else if (password.length < 6) {
-            binding.tilPassword.error = "Password minimal 6 karakter"
-            isValid = false
+        // Validasi Email
+        when {
+            email.isEmpty() -> {
+                binding.tilEmail.error = "Email tidak boleh kosong"
+                isValid = false
+            }
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                binding.tilEmail.error = "Format email tidak valid"
+                isValid = false
+            }
+        }
+
+        // Validasi Password
+        when {
+            password.isEmpty() -> {
+                binding.tilPassword.error = "Password tidak boleh kosong"
+                isValid = false
+            }
+            password.length < 6 -> {
+                binding.tilPassword.error = "Password minimal 6 karakter"
+                isValid = false
+            }
+        }
+
+        // Validasi Confirm Password
+        when {
+            confirmPassword.isEmpty() -> {
+                binding.tilConfirmPassword.error = "Konfirmasi password tidak boleh kosong"
+                isValid = false
+            }
+            confirmPassword != password -> {
+                binding.tilConfirmPassword.error = "Password tidak cocok"
+                isValid = false
+            }
         }
 
         return isValid
@@ -93,35 +133,30 @@ class LoginActivity : AppCompatActivity() {
 
     // ─── Auth actions (UI-only placeholders) ──────────────────────────────────
 
-    private fun performLogin() {
-        setLoginLoading(true)
+    private fun performRegister() {
+        setRegisterLoading(true)
+        Toast.makeText(this, "Berhasil mendaftar", Toast.LENGTH_SHORT).show()
         binding.root.postDelayed({
-            setLoginLoading(false)
-            startActivity(Intent(this, HomeActivity::class.java))
+            setRegisterLoading(false)
+            startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }, 1_500)
     }
 
-    private fun onForgotPasswordClicked() {
-        // TODO: Navigate to ForgotPasswordActivity / show bottom sheet
-        Toast.makeText(this, "Lupa password diklik", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun onRegisterClicked() {
-        // TODO: Navigate to RegisterActivity
-//        Toast.makeText(this, "Daftar Sekarang diklik", Toast.LENGTH_SHORT).show()
+    private fun onLoginClicked() {
+        // TODO: Navigate to LoginActivity
         binding.root.postDelayed({
-            setLoginLoading(false)
-            startActivity(Intent(this, RegisterActivity::class.java))
+            setRegisterLoading(false)
+            startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }, 1_500)
     }
 
     // ─── Loading state ────────────────────────────────────────────────────────
 
-    private fun setLoginLoading(isLoading: Boolean) {
+    private fun setRegisterLoading(isLoading: Boolean) {
         binding.btnLogin.isEnabled = !isLoading
-        binding.btnLogin.text = if (isLoading) "" else "Login"
+        binding.btnLogin.text = if (isLoading) "" else "Register"
         // Optional: show a CircularProgressIndicator inside the button
         // binding.progressLogin.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
