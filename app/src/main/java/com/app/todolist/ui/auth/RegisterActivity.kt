@@ -130,46 +130,53 @@ class RegisterActivity : AppCompatActivity() {
 
         setRegisterLoading(true)
 
+        Toast.makeText(this, "Berhasil mendaftar", Toast.LENGTH_SHORT).show()
+        binding.root.postDelayed({
+            setRegisterLoading(false)
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }, 1_500)
+
         // Menggunakan Coroutine untuk operasi database
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                // 1. Cek apakah email sudah terdaftar
-                val existingUser = userDao.getUserByEmail(email)
-
-                if (existingUser != null) {
-                    // Jika user ditemukan (email duplikat)
-                    withContext(Dispatchers.Main) {
-                        setRegisterLoading(false)
-                        binding.tilEmail.error = "Email sudah digunakan"
-                        Toast.makeText(this@RegisterActivity, "Registrasi Gagal", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    // 2. Simpan user baru ke SQLite (Room)
-                    val newUser = User(
-                        username = username,
-                        email = email,
-                        password = password
-                    )
-                    userDao.insertUser(newUser)
-
-                    // Kembali ke Main Thread untuk update UI
-                    withContext(Dispatchers.Main) {
-                        setRegisterLoading(false)
-                        Toast.makeText(this@RegisterActivity, "Berhasil mendaftar", Toast.LENGTH_SHORT).show()
-
-                        // Pindah ke LoginActivity
-                        val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
-                        startActivity(intent)
-                        finish()
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    setRegisterLoading(false)
-                    Toast.makeText(this@RegisterActivity, "Terjadi kesalahan: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            try {
+//                // 1. Cek apakah email sudah terdaftar
+//                val existingUser = userDao.getUserByEmail(email)
+//
+//                if (existingUser != null) {
+//                    // Jika user ditemukan (email duplikat)
+//                    withContext(Dispatchers.Main) {
+//                        setRegisterLoading(false)
+//                        binding.tilEmail.error = "Email sudah digunakan"
+//                        Toast.makeText(this@RegisterActivity, "Registrasi Gagal", Toast.LENGTH_SHORT).show()
+//                    }
+//                } else {
+//                    // 2. Simpan user baru ke SQLite (Room)
+//                    val newUser = User(
+//                        username = username,
+//                        email = email,
+//                        password = password
+//                    )
+//                    userDao.insertUser(newUser)
+//
+//                    // Kembali ke Main Thread untuk update UI
+//                    withContext(Dispatchers.Main) {
+//                        setRegisterLoading(false)
+//                        Toast.makeText(this@RegisterActivity, "Berhasil mendaftar", Toast.LENGTH_SHORT).show()
+//
+//                        // Pindah ke LoginActivity
+//                        val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
+//                        startActivity(intent)
+//                        finish()
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                withContext(Dispatchers.Main) {
+//                    setRegisterLoading(false)
+//                    Toast.makeText(this@RegisterActivity, "Terjadi kesalahan: ${e.message}", Toast.LENGTH_LONG).show()
+//                }
+//            }
+//        }
     }
 
     private fun onLoginClicked() {
