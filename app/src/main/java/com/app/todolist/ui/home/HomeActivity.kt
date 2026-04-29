@@ -42,9 +42,8 @@ class HomeActivity : AppCompatActivity() {
     // ── User greeting ─────────────────────────────────────────────────────────
 
     private fun setupUserGreeting() {
-        val user = UserRepository.getCurrentUser()
-        // binding.tvGreeting?.text     = "Halo, ${user.name.split(" ").first()}!"
-        // binding.tvUserInitials?.text = user.avatarInitials
+        val firstName = UserRepository.getCurrentUser().name.split(" ").first()
+        binding.tvGreeting.text = "Halo, $firstName 👋"
     }
 
     // ── RecyclerView ──────────────────────────────────────────────────────────

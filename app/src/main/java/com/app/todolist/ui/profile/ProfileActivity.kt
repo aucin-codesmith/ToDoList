@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.app.todolist.R
+import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.data.repository.UserRepository
 import com.app.todolist.databinding.ActivityProfileBinding
 import com.app.todolist.ui.auth.LoginActivity
@@ -27,15 +28,41 @@ class ProfileActivity : AppCompatActivity() {
         setupBottomNav()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh stats saat kembali dari halaman lain (misal task baru ditambah)
+        updateStats()
+    }
+
     // ── User info dari UserRepository ─────────────────────────────────────────
 
     private fun setupUserInfo() {
         val user = UserRepository.getCurrentUser()
-        // Tampilkan info user ke views yang tersedia di layout
-        // binding.tvProfileName?.text     = user.name
-        // binding.tvProfileEmail?.text    = user.email
-        // binding.tvProfileInitials?.text = user.avatarInitials
-        // Sesuaikan dengan ID view yang ada di activity_profile.xml
+
+        // Avatar initials (2 huruf pertama nama)
+        binding.tvAvatarInitials.text = user.avatarInitials
+
+        // Nama lengkap sebagai display name
+        binding.tvProfileName.text = user.name
+
+        // Role badge — tampilkan role dari UserProfile
+        binding.tvProfileRole.text = "${user.role} ✓"
+
+        // Email
+        binding.tvProfileEmail.text = user.email
+
+        // Stats dari TaskRepository
+        updateStats()
+    }
+
+    private fun updateStats() {
+        val total     = TaskRepository.getTotalCount()
+        val completed = TaskRepository.getCompletedCount()
+        val active    = TaskRepository.getRemainingCount()
+
+        binding.tvStatTotal.text     = total.toString()
+        binding.tvStatCompleted.text = completed.toString()
+        binding.tvStatActive.text    = active.toString()
     }
 
     // ── Click listeners ───────────────────────────────────────────────────────
@@ -54,7 +81,11 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         binding.btnChangeUsername.setOnClickListener {
-            Toast.makeText(this, "Ubah Username: ${UserRepository.getUserUsername()}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Ubah Username: @${UserRepository.getUserUsername()}",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         binding.btnChangePassword.setOnClickListener {
@@ -84,8 +115,9 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun performLogout() {
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val intent = Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
         startActivity(intent)
         finish()
     }

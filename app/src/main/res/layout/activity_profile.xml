@@ -75,6 +75,7 @@
                     android:layout_height="88dp">
 
                     <TextView
+                        android:id="@+id/tvAvatarInitials"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:text="AU"
@@ -94,6 +95,7 @@
                     android:layout_marginTop="14dp">
 
                     <TextView
+                        android:id="@+id/tvProfileName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="aucin"
@@ -102,6 +104,7 @@
                         android:fontFamily="sans-serif-medium" />
 
                     <TextView
+                        android:id="@+id/tvProfileRole"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -115,6 +118,7 @@
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tvProfileEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -156,6 +160,7 @@
                             android:fontFamily="sans-serif-medium" />
 
                         <TextView
+                            android:id="@+id/tvStatTotal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
@@ -201,6 +206,7 @@
                                     android:textColor="@color/on_surface_variant" />
 
                                 <TextView
+                                    android:id="@+id/tvStatCompleted"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="8"
@@ -245,6 +251,7 @@
                                     android:textColor="@color/on_surface_variant" />
 
                                 <TextView
+                                    android:id="@+id/tvStatActive"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="4"
