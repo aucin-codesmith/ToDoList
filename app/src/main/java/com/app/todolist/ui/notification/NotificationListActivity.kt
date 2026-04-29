@@ -8,69 +8,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.NotificationAdapter
-import com.app.todolist.databinding.ActivityNotificationListBinding
-import com.app.todolist.model.NotificationItem
+import com.app.todolist.data.repository.NotificationRepository
+import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.model.NotifType
+import com.app.todolist.databinding.ActivityNotificationListBinding
 import com.app.todolist.ui.home.HomeActivity
+import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.TaskListActivity
+import com.app.todolist.ui.task.form.AddTaskActivity
 
 class NotificationListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNotificationListBinding
     private lateinit var adapter: NotificationAdapter
 
-    // ── Sample data ───────────────────────────────────────────────────────────
-    private val allNotifications = mutableListOf(
-        NotificationItem(
-            id            = 1,
-            title         = "Tugas Segera Berakhir",
-            body          = "Selesaikan proyek \"Desain UI App\" sebelum jam 17:00 hari ini.",
-            bodyHighlight = "\"Desain UI App\"",
-            time          = "5 mnt yang lalu",
-            type          = NotifType.DEADLINE,
-            isRead        = false,
-            taskCategory  = "Kerja",
-            taskDeadline  = "Hari ini, 17:00",
-            taskPriority  = "Tinggi"
-        ),
-        NotificationItem(
-            id            = 2,
-            title         = "Pengingat Harian",
-            body          = "Jangan lupa untuk mengisi jurnal harian Anda untuk menjaga produktivitas.",
-            time          = "2 jam yang lalu",
-            type          = NotifType.REMINDER,
-            isRead        = false,
-            taskCategory  = "Pribadi",
-            taskDeadline  = "-",
-            taskPriority  = "Sedang"
-        ),
-        NotificationItem(
-            id            = 3,
-            title         = "Tugas Selesai",
-            body          = "\"Belanja Mingguan\" telah ditandai sebagai selesai oleh Anda.",
-            bodyHighlight = "\"Belanja Mingguan\"",
-            time          = "Kemarin",
-            type          = NotifType.DONE,
-            isRead        = true,
-            taskCategory  = "Pribadi",
-            taskDeadline  = "Kemarin, 12:00",
-            taskPriority  = "Rendah"
-        ),
-        NotificationItem(
-            id            = 4,
-            title         = "Pembaruan Sistem",
-            body          = "Versi 2.1.0 telah tersedia dengan perbaikan bug sinkronisasi cloud.",
-            time          = "2 hari yang lalu",
-            type          = NotifType.SYSTEM,
-            isRead        = true
-        ),
-    )
-
     private var currentFilter = FilterType.ALL
-
     enum class FilterType { ALL, UNREAD, SYSTEM }
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,26 +38,22 @@ class NotificationListActivity : AppCompatActivity() {
         applyFilter()
     }
 
-    // ── Toolbar ───────────────────────────────────────────────────────────────
+    override fun onResume() {
+        super.onResume()
+        applyFilter()
+    }
 
     private fun setupToolbar() {
         binding.btnBack.setOnClickListener { finish() }
     }
 
-    // ── RecyclerView ──────────────────────────────────────────────────────────
-
     private fun setupRecyclerView() {
         adapter = NotificationAdapter(mutableListOf()) { notif ->
-            // 1. Tandai sebagai dibaca
-            val index = allNotifications.indexOfFirst { it.id == notif.id }
-            if (index != -1) {
-                allNotifications[index] = allNotifications[index].copy(isRead = true)
-                applyFilter()
-            }
-            // 2. Buka DetailNotificationActivity
-            openDetailNotification(notif)
+            // Tandai sudah dibaca lalu buka detail
+            NotificationRepository.markAsRead(notif.id)
+            applyFilter()
+            openDetailNotification(notif.id)
         }
-
         binding.rvNotifications.apply {
             layoutManager            = LinearLayoutManager(this@NotificationListActivity)
             adapter                  = this@NotificationListActivity.adapter
@@ -112,12 +61,14 @@ class NotificationListActivity : AppCompatActivity() {
         }
     }
 
-    // ── Navigation ────────────────────────────────────────────────────────────
-
-    private fun openDetailNotification(notif: NotificationItem) {
+    private fun openDetailNotification(notifId: Int) {
+        val notif   = NotificationRepository.getNotificationById(notifId) ?: return
         val hasTask = notif.type == NotifType.DEADLINE ||
                 notif.type == NotifType.REMINDER ||
                 notif.type == NotifType.DONE
+
+        // Resolve data task dari TaskRepository menggunakan taskId yang tersimpan di notif
+        val linkedTask = notif.taskId?.let { TaskRepository.getTaskItemById(it) }
 
         val intent = Intent(this, DetailNotificationActivity::class.java).apply {
             putExtra(DetailNotificationActivity.EXTRA_NOTIF_ID,       notif.id)
@@ -130,12 +81,16 @@ class NotificationListActivity : AppCompatActivity() {
             putExtra(DetailNotificationActivity.EXTRA_TASK_DEADLINE,  notif.taskDeadline)
             putExtra(DetailNotificationActivity.EXTRA_TASK_PRIORITY,  notif.taskPriority)
             putExtra(DetailNotificationActivity.EXTRA_HAS_TASK,       hasTask)
-            putExtra(DetailNotificationActivity.EXTRA_TASK_ID,        notif.id)
+            // Pass taskId task asli (bukan notifId) agar DetailNotification bisa navigasi ke task
+            putExtra(DetailNotificationActivity.EXTRA_TASK_ID,        notif.taskId ?: -1)
+            // Data tambahan untuk pass ke DetailTaskActivity
+            putExtra(DetailNotificationActivity.EXTRA_TASK_TITLE,     linkedTask?.title     ?: notif.title)
+            putExtra(DetailNotificationActivity.EXTRA_TASK_DESKRIPSI, linkedTask?.description ?: "-")
+            putExtra(DetailNotificationActivity.EXTRA_TASK_STATUS,
+                if (linkedTask?.isCompleted == true) "selesai" else "belum_selesai")
         }
         startActivity(intent)
     }
-
-    // ── Filter Tabs ───────────────────────────────────────────────────────────
 
     private fun setupFilters() {
         binding.btnFilterAll.setOnClickListener    { selectFilter(FilterType.ALL) }
@@ -150,12 +105,11 @@ class NotificationListActivity : AppCompatActivity() {
     }
 
     private fun updateFilterUI() {
-        val buttons = listOf(
+        listOf(
             binding.btnFilterAll    to FilterType.ALL,
             binding.btnFilterUnread to FilterType.UNREAD,
             binding.btnFilterSystem to FilterType.SYSTEM
-        )
-        buttons.forEach { (tv, type) ->
+        ).forEach { (tv, type) ->
             val textView = tv as TextView
             if (type == currentFilter) {
                 textView.setBackgroundResource(R.drawable.bg_filter_selected)
@@ -168,17 +122,15 @@ class NotificationListActivity : AppCompatActivity() {
     }
 
     private fun applyFilter() {
-        val filtered = allNotifications.filter { notif ->
+        val filtered = NotificationRepository.getNotifications().filter { notif ->
             when (currentFilter) {
                 FilterType.ALL    -> true
                 FilterType.UNREAD -> !notif.isRead
-                FilterType.SYSTEM -> notif.type == com.app.todolist.model.NotifType.SYSTEM
+                FilterType.SYSTEM -> notif.type == NotifType.SYSTEM
             }
         }
         adapter.updateItems(filtered)
     }
-
-    // ── Promo Card ────────────────────────────────────────────────────────────
 
     private fun setupPromoCard() {
         binding.btnPromoAction.setOnClickListener {
@@ -186,26 +138,13 @@ class NotificationListActivity : AppCompatActivity() {
         }
     }
 
-    // ── Bottom Nav ────────────────────────────────────────────────────────────
-
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    finish(); true
-                }
-                R.id.nav_tasks -> {
-                    startActivity(Intent(this, TaskListActivity::class.java))
-                    finish(); true
-                }
-                R.id.nav_add -> {
-                    startActivity(Intent(this, com.app.todolist.ui.task.form.AddTaskActivity::class.java))
-                    true
-                }
-                R.id.nav_profile -> {
-                    Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show(); true
-                }
+                R.id.nav_home    -> { startActivity(Intent(this, HomeActivity::class.java)); finish(); true }
+                R.id.nav_tasks   -> { startActivity(Intent(this, TaskListActivity::class.java)); finish(); true }
+                R.id.nav_add     -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
+                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); true }
                 else -> false
             }
         }

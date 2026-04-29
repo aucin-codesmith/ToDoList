@@ -10,50 +10,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.TaskListAdapter
+import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityTaskListBinding
-import com.app.todolist.model.TaskItem
-import com.app.todolist.ui.task.form.AddTaskActivity
 import com.app.todolist.ui.home.HomeActivity
 import com.app.todolist.ui.profile.ProfileActivity
+import com.app.todolist.ui.task.form.AddTaskActivity
 
 class TaskListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTaskListBinding
     private lateinit var adapter: TaskListAdapter
 
-    // ── Sample data (replace with ViewModel + Repository later) ──────────────
-    private val allTasks = mutableListOf(
-        TaskItem(
-            1,
-            "Desain Prototipe Mobile App",
-            "Work",
-            "Mengembangkan prototipe high-fidelity menggunakan Figma yang mencakup alur registrasi pengguna, dasbor utama, dan visualisasi pengeluaran bulanan",
-            "Hari ini, 14:00",
-            priority = "Tinggi",
-            assigneeTag = "KMP"),
-        TaskItem(
-            2,
-            "Review Laporan Mingguan",
-            "Management",
-            "Melakukan audit terhadap laporan progres mingguan untuk memastikan pencapaian KPI dan mengidentifikasi hambatan teknis (blockers) pada sisi backend.",
-            "Besok, 09:00",
-            priority = "Sedang"),
-        TaskItem(
-            3,
-            "Update Dokumentasi API",
-            "Development",
-            "Memperbarui referensi endpoint pada Swagger/Postman untuk mencerminkan perubahan skema database dan penambahan fitur autentikasi OAuth2.",
-            "Hari ini, 16:00",
-            priority = "Rendah",
-            assigneeTag = "DEV"),
-    )
-
     private var currentFilter = FilterType.ACTIVE
     private var searchQuery   = ""
 
     enum class FilterType { ACTIVE, COMPLETED, ALL }
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,20 +43,15 @@ class TaskListActivity : AppCompatActivity() {
         applyFilter()
     }
 
-    // ── Setup ─────────────────────────────────────────────────────────────────
-
     private fun setupRecyclerView() {
         adapter = TaskListAdapter(
             tasks = mutableListOf(),
             onCheckedChange = { task, isChecked ->
-                allTasks.find { it.id == task.id }?.isCompleted = isChecked
+                TaskRepository.updateTaskItemCompleted(task.id, isChecked)
                 applyFilter()
             },
-            onItemClick = { task ->
-                openDetailTask(task)
-            }
+            onItemClick = { task -> openDetailTask(task.id) }
         )
-
         binding.rvTasks.apply {
             layoutManager            = LinearLayoutManager(this@TaskListActivity)
             adapter                  = this@TaskListActivity.adapter
@@ -114,32 +80,20 @@ class TaskListActivity : AppCompatActivity() {
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, AddTaskActivity::class.java))
         }
-
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_tasks -> true
-                R.id.nav_add -> {
-                    startActivity(Intent(this, AddTaskActivity::class.java))
-                    true
-                }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
-                    true
-                }
+                R.id.nav_home    -> { startActivity(Intent(this, HomeActivity::class.java)); finish(); true }
+                R.id.nav_tasks   -> true
+                R.id.nav_add     -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
+                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); true }
                 else -> false
             }
         }
         binding.bottomNav.selectedItemId = R.id.nav_tasks
     }
 
-    // ── Navigation ────────────────────────────────────────────────────────────
-
-    private fun openDetailTask(task: TaskItem) {
+    private fun openDetailTask(taskId: Int) {
+        val task = TaskRepository.getTaskItemById(taskId) ?: return
         val intent = Intent(this, DetailTaskActivity::class.java).apply {
             putExtra(DetailTaskActivity.EXTRA_TASK_ID,        task.id)
             putExtra(DetailTaskActivity.EXTRA_TASK_TITLE,     task.title)
@@ -147,12 +101,10 @@ class TaskListActivity : AppCompatActivity() {
             putExtra(DetailTaskActivity.EXTRA_TASK_KATEGORI,  task.category)
             putExtra(DetailTaskActivity.EXTRA_TASK_DEADLINE,  task.dateTime)
             putExtra(DetailTaskActivity.EXTRA_TASK_PRIORITAS, task.priority)
-            putExtra(DetailTaskActivity.EXTRA_TASK_DESKRIPSI, task.description ?: "-")
+            putExtra(DetailTaskActivity.EXTRA_TASK_DESKRIPSI, task.description)
         }
         startActivity(intent)
     }
-
-    // ── Filter logic ──────────────────────────────────────────────────────────
 
     private fun selectFilter(type: FilterType) {
         currentFilter = type
@@ -178,6 +130,7 @@ class TaskListActivity : AppCompatActivity() {
     }
 
     private fun applyFilter() {
+        val allTasks = TaskRepository.getTaskItems()
         val filtered = allTasks
             .filter { task ->
                 when (currentFilter) {
@@ -187,12 +140,10 @@ class TaskListActivity : AppCompatActivity() {
                 }
             }
             .filter { task ->
-                searchQuery.isEmpty() ||
-                        task.title.contains(searchQuery, ignoreCase = true)
+                searchQuery.isEmpty() || task.title.contains(searchQuery, ignoreCase = true)
             }
 
         adapter.updateTasks(filtered)
-
         val isEmpty = filtered.isEmpty()
         binding.layoutEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
         binding.rvTasks.visibility     = if (isEmpty) View.GONE    else View.VISIBLE

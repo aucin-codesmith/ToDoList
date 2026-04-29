@@ -6,11 +6,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.app.todolist.R
+import com.app.todolist.data.repository.UserRepository
 import com.app.todolist.databinding.ActivityProfileBinding
-import com.app.todolist.ui.task.form.AddTaskActivity
 import com.app.todolist.ui.auth.LoginActivity
 import com.app.todolist.ui.home.HomeActivity
 import com.app.todolist.ui.task.TaskListActivity
+import com.app.todolist.ui.task.form.AddTaskActivity
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -21,9 +22,23 @@ class ProfileActivity : AppCompatActivity() {
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupUserInfo()
         setupClickListeners()
         setupBottomNav()
     }
+
+    // ── User info dari UserRepository ─────────────────────────────────────────
+
+    private fun setupUserInfo() {
+        val user = UserRepository.getCurrentUser()
+        // Tampilkan info user ke views yang tersedia di layout
+        // binding.tvProfileName?.text     = user.name
+        // binding.tvProfileEmail?.text    = user.email
+        // binding.tvProfileInitials?.text = user.avatarInitials
+        // Sesuaikan dengan ID view yang ada di activity_profile.xml
+    }
+
+    // ── Click listeners ───────────────────────────────────────────────────────
 
     private fun setupClickListeners() {
         binding.btnBack.setOnClickListener {
@@ -39,7 +54,7 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         binding.btnChangeUsername.setOnClickListener {
-            Toast.makeText(this, "Ubah Username", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Ubah Username: ${UserRepository.getUserUsername()}", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnChangePassword.setOnClickListener {
@@ -63,9 +78,7 @@ class ProfileActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Logout")
             .setMessage("Apakah kamu yakin ingin keluar dari akun ini?")
-            .setPositiveButton("Logout") { _, _ ->
-                performLogout()
-            }
+            .setPositiveButton("Logout") { _, _ -> performLogout() }
             .setNegativeButton("Batal", null)
             .show()
     }
@@ -77,25 +90,16 @@ class ProfileActivity : AppCompatActivity() {
         finish()
     }
 
+    // ── Bottom Nav ────────────────────────────────────────────────────────────
+
     private fun setupBottomNav() {
         binding.bottomNav.selectedItemId = R.id.nav_profile
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_tasks -> {
-                    startActivity(Intent(this, TaskListActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_add -> {
-                    startActivity(Intent(this, AddTaskActivity::class.java))
-                    true
-                }
+                R.id.nav_home    -> { startActivity(Intent(this, HomeActivity::class.java)); finish(); true }
+                R.id.nav_tasks   -> { startActivity(Intent(this, TaskListActivity::class.java)); finish(); true }
+                R.id.nav_add     -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
                 R.id.nav_profile -> true
                 else -> false
             }

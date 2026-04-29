@@ -6,55 +6,85 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.TaskAdapter
+import com.app.todolist.data.repository.NotificationRepository
+import com.app.todolist.data.repository.TaskRepository
+import com.app.todolist.data.repository.UserRepository
 import com.app.todolist.databinding.ActivityMainBinding
-import com.app.todolist.model.Priority
-import com.app.todolist.model.Task
 import com.app.todolist.ui.notification.NotificationListActivity
-import com.app.todolist.ui.task.form.AddTaskActivity
 import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.TaskListActivity
+import com.app.todolist.ui.task.form.AddTaskActivity
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var taskAdapter: TaskAdapter
 
-    private val tasks = mutableListOf(
-        Task(1, "Review Design System",   "14 Okt, 2023", Priority.TINGGI),
-        Task(2, "Daily Standup Meeting",  "14 Okt, 2023", Priority.MEDIUM, isCompleted = true),
-        Task(3, "Beli Bahan Makanan",     "15 Okt, 2023", Priority.RENDAH),
-    )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupUserGreeting()
         setupRecyclerView()
         updateSummaryCard()
         setupClickListeners()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh data dari repository saat kembali dari halaman lain
+        taskAdapter.updateTasks(TaskRepository.getRecentTasks())
+        updateSummaryCard()
+        updateNotifBadge()
+    }
+
+    // ── User greeting ─────────────────────────────────────────────────────────
+
+    private fun setupUserGreeting() {
+        val user = UserRepository.getCurrentUser()
+        // binding.tvGreeting?.text     = "Halo, ${user.name.split(" ").first()}!"
+        // binding.tvUserInitials?.text = user.avatarInitials
+    }
+
+    // ── RecyclerView ──────────────────────────────────────────────────────────
+
     private fun setupRecyclerView() {
-        taskAdapter = TaskAdapter(tasks) { _, _ ->
+        taskAdapter = TaskAdapter(
+            tasks = TaskRepository.getRecentTasks().toMutableList()
+        ) { task, isChecked ->
+            TaskRepository.updateTaskItemCompleted(task.id, isChecked)
             updateSummaryCard()
         }
         binding.rvTasks.apply {
-            layoutManager = LinearLayoutManager(this@HomeActivity)
-            adapter = taskAdapter
+            layoutManager            = LinearLayoutManager(this@HomeActivity)
+            adapter                  = taskAdapter
             isNestedScrollingEnabled = false
         }
     }
 
+    // ── Summary card ──────────────────────────────────────────────────────────
+
     private fun updateSummaryCard() {
-        val total     = tasks.size
-        val completed = tasks.count { it.isCompleted }
-        val remaining = total - completed
+        val total     = TaskRepository.getTotalCount()
+        val completed = TaskRepository.getCompletedCount()
+        val remaining = TaskRepository.getRemainingCount()
 
         binding.tvTaskCount.text    = "$total Tugas Hari Ini"
         binding.tvTaskProgress.text = "$completed selesai · $remaining tersisa"
         binding.progressTasks.progress = if (total > 0) (completed * 100) / total else 0
     }
+
+    // ── Notification badge ────────────────────────────────────────────────────
+
+    private fun updateNotifBadge() {
+        val unread = NotificationRepository.getUnreadCount()
+        // Tampilkan badge jika ada notif belum dibaca
+        // binding.badgeNotif?.visibility = if (unread > 0) View.VISIBLE else View.GONE
+        // binding.badgeNotif?.text       = unread.toString()
+    }
+
+    // ── Click listeners ───────────────────────────────────────────────────────
 
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
@@ -71,24 +101,11 @@ class HomeActivity : AppCompatActivity() {
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> true
-
-                R.id.nav_tasks -> {
-                    startActivity(Intent(this, TaskListActivity::class.java))
-                    true
-                }
-
-                R.id.nav_add -> {
-                    startActivity(Intent(this, AddTaskActivity::class.java))
-                    true
-                }
-
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
-                    true
-                }
-
-                else -> false
+                R.id.nav_home    -> true
+                R.id.nav_tasks   -> { startActivity(Intent(this, TaskListActivity::class.java)); true }
+                R.id.nav_add     -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
+                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); true }
+                else             -> false
             }
         }
     }
