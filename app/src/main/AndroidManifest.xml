@@ -56,9 +56,14 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.task.add.AddTaskActivity"
+            android:name=".ui.task.form.AddTaskActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+
+        <activity
+        android:name=".ui.task.form.EditTaskActivity"
+        android:exported="false"
+        android:screenOrientation="portrait" />
 
         <!-- Profile Activity -->
         <activity

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- ── Toolbar ── -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background"
+        android:paddingTop="24dp"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@color/primary"
+            app:title="Edit Tugas"
+            app:titleTextColor="@color/primary"
+            app:titleTextAppearance="@style/TextAppearance.ToDoList.Toolbar" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- ── Scrollable content ── -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="16dp">
+
+            <!-- ── Judul Tugas ── -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilTitle"
+                style="@style/Widget.ToDoList.TextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Judul Tugas">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:paddingVertical="14dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/on_surface"
+                    android:textColorHint="@color/outline" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ── Deskripsi ── -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDesc"
+                style="@style/Widget.ToDoList.TextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Deskripsi">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDesc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:minLines="3"
+                    android:gravity="top"
+                    android:paddingVertical="14dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/on_surface"
+                    android:textColorHint="@color/outline" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ── Kategori Label ── -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Kategori"
+                android:textSize="14sp"
+                android:textColor="@color/on_surface"
+                android:fontFamily="sans-serif-medium" />
+
+            <!-- ── Kategori Chips ── -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipPribadi"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pribadi"
+                        app:chipBackgroundColor="@color/selector_chip_bg"
+                        app:chipStrokeColor="@color/outline_variant"
+                        app:chipStrokeWidth="1dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipKerja"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Kerja"
+                        app:chipBackgroundColor="@color/selector_chip_bg"
+                        app:chipStrokeColor="@color/outline_variant"
+                        app:chipStrokeWidth="1dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipBelajar"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Belajar"
+                        app:chipBackgroundColor="@color/selector_chip_bg"
+                        app:chipStrokeColor="@color/outline_variant"
+                        app:chipStrokeWidth="1dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipTambah"
+                        style="@style/Widget.Material3.Chip.Assist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+"
+                        app:chipBackgroundColor="@color/surface_container_high"
+                        app:chipStrokeColor="@color/outline_variant"
+                        app:chipStrokeWidth="1dp" />
+
+                </com.google.android.material.chip.ChipGroup>
+            </HorizontalScrollView>
+
+            <!-- ── Deadline Label ── -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Deadline"
+                android:textSize="14sp"
+                android:textColor="@color/on_surface"
+                android:fontFamily="sans-serif-medium" />
+
+            <!-- ── Deadline Field ── -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDeadline"
+                style="@style/Widget.ToDoList.TextInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:hint="Deadline"
+                app:endIconDrawable="@drawable/ic_calendar_small"
+                app:endIconTint="@color/outline">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDeadline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:paddingVertical="14dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/on_surface"
+                    android:textColorHint="@color/outline" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- ── Prioritas Label ── -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Prioritas"
+                android:textSize="14sp"
+                android:textColor="@color/on_surface"
+                android:fontFamily="sans-serif-medium" />
+
+            <!-- ── Prioritas Toggle ── -->
+            <LinearLayout
+                android:id="@+id/layoutPriority"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:background="@color/surface_container_high"
+                android:padding="4dp">
+
+                <TextView
+                    android:id="@+id/btnPriorityLow"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Rendah"
+                    android:gravity="center"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnPriorityMed"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Sedang"
+                    android:gravity="center"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnPriorityHigh"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Tinggi"
+                    android:gravity="center"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </LinearLayout>
+
+            <!-- ── Simpan Button ── -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSave"
+                style="@style/Widget.ToDoList.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="Simpan Perubahan"
+                app:icon="@drawable/ic_check"
+                app:iconGravity="textStart"
+                app:iconTint="@color/white"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -9,7 +9,7 @@ import com.app.todolist.adapter.TaskAdapter
 import com.app.todolist.databinding.ActivityMainBinding
 import com.app.todolist.model.Priority
 import com.app.todolist.model.Task
-import com.app.todolist.ui.task.add.AddTaskActivity
+import com.app.todolist.ui.task.form.AddTaskActivity
 import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.TaskListActivity
 

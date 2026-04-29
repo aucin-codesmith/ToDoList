@@ -12,7 +12,7 @@ import com.app.todolist.R
 import com.app.todolist.adapter.TaskListAdapter
 import com.app.todolist.databinding.ActivityTaskListBinding
 import com.app.todolist.model.TaskItem
-import com.app.todolist.ui.task.add.AddTaskActivity
+import com.app.todolist.ui.task.form.AddTaskActivity
 import com.app.todolist.ui.home.HomeActivity
 import com.app.todolist.ui.profile.ProfileActivity
 
