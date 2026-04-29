@@ -68,10 +68,10 @@ class DetailTaskActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-        toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        // Tidak pakai setSupportActionBar sama sekali
+        toolbar.setNavigationOnClickListener {
+            finish()  // langsung kembali ke TaskListActivity
+        }
     }
 
     // ─── Load data from Intent ────────────────────────────────────────────────
