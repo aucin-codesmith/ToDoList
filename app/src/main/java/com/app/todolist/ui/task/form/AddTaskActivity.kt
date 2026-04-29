@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.app.todolist.R
 import com.app.todolist.databinding.ActivityAddTaskBinding
 import com.app.todolist.ui.home.HomeActivity
+import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.TaskListActivity
 import java.util.Calendar
 
@@ -160,7 +161,8 @@ class AddTaskActivity : AppCompatActivity() {
                 }
                 R.id.nav_add     -> true
                 R.id.nav_profile -> {
-                    Toast.makeText(this, "Profil", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    finish()
                     true
                 }
                 else -> false
