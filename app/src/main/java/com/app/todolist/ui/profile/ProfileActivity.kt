@@ -7,10 +7,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.app.todolist.R
 import com.app.todolist.databinding.ActivityProfileBinding
-import com.app.todolist.ui.add.AddTaskActivity
+import com.app.todolist.ui.task.add.AddTaskActivity
 import com.app.todolist.ui.auth.LoginActivity
 import com.app.todolist.ui.home.HomeActivity
-import com.app.todolist.ui.tasklist.TaskListActivity
+import com.app.todolist.ui.task.TaskListActivity
 
 class ProfileActivity : AppCompatActivity() {
 
