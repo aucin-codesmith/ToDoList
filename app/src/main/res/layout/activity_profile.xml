@@ -31,7 +31,7 @@
                     android:layout_height="32dp"
                     android:layout_centerVertical="true"
                     android:src="@drawable/ic_arrow_back"
-                    android:tint="@color/primary"
+                    app:tint="@color/primary"
                     android:contentDescription="Back"
                     android:clickable="true"
                     android:focusable="true"
@@ -53,7 +53,7 @@
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
                     android:src="@drawable/ic_settings"
-                    android:tint="@color/on_surface_variant"
+                    app:tint="@color/on_surface_variant"
                     android:contentDescription="Settings"
                     android:clickable="true"
                     android:focusable="true"
@@ -213,7 +213,7 @@
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:src="@drawable/ic_check_circle"
-                                android:tint="@color/outline_variant"
+                                app:tint="@color/outline_variant"
                                 android:contentDescription="@null" />
                         </LinearLayout>
 
@@ -257,7 +257,7 @@
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:src="@drawable/ic_calendar"
-                                android:tint="@color/outline_variant"
+                                app:tint="@color/outline_variant"
                                 android:contentDescription="@null" />
                         </LinearLayout>
                     </LinearLayout>
@@ -307,7 +307,7 @@
                             android:layout_height="22dp"
                             android:layout_marginEnd="16dp"
                             android:src="@drawable/ic_notifications"
-                            android:tint="@color/on_surface_variant"
+                            app:tint="@color/on_surface_variant"
                             android:contentDescription="@null" />
 
                         <TextView
@@ -342,7 +342,7 @@
                             android:layout_height="22dp"
                             android:layout_marginEnd="16dp"
                             android:src="@drawable/ic_person"
-                            android:tint="@color/on_surface_variant"
+                            app:tint="@color/on_surface_variant"
                             android:contentDescription="@null" />
 
                         <TextView
@@ -357,7 +357,7 @@
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/outline"
+                            app:tint="@color/outline"
                             android:contentDescription="@null" />
                     </LinearLayout>
 
@@ -402,7 +402,7 @@
                         android:layout_height="22dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_lock"
-                        android:tint="@color/on_surface_variant"
+                        app:tint="@color/on_surface_variant"
                         android:contentDescription="@null" />
 
                     <TextView
@@ -417,7 +417,7 @@
                         android:layout_width="18dp"
                         android:layout_height="18dp"
                         android:src="@drawable/ic_chevron_right"
-                        android:tint="@color/outline"
+                        app:tint="@color/outline"
                         android:contentDescription="@null" />
                 </LinearLayout>
 
@@ -466,7 +466,7 @@
                             android:layout_height="22dp"
                             android:layout_marginEnd="16dp"
                             android:src="@drawable/ic_info"
-                            android:tint="@color/on_surface_variant"
+                            app:tint="@color/on_surface_variant"
                             android:contentDescription="@null" />
 
                         <TextView
@@ -481,7 +481,7 @@
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/outline"
+                            app:tint="@color/outline"
                             android:contentDescription="@null" />
                     </LinearLayout>
 
@@ -508,7 +508,7 @@
                             android:layout_height="22dp"
                             android:layout_marginEnd="16dp"
                             android:src="@drawable/ic_help"
-                            android:tint="@color/on_surface_variant"
+                            app:tint="@color/on_surface_variant"
                             android:contentDescription="@null" />
 
                         <TextView
@@ -523,7 +523,7 @@
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:src="@drawable/ic_chevron_right"
-                            android:tint="@color/outline"
+                            app:tint="@color/outline"
                             android:contentDescription="@null" />
                     </LinearLayout>
 
@@ -550,7 +550,7 @@
                             android:layout_height="22dp"
                             android:layout_marginEnd="16dp"
                             android:src="@drawable/ic_logout"
-                            android:tint="@color/error"
+                            app:tint="@color/error"
                             android:contentDescription="@null" />
 
                         <TextView

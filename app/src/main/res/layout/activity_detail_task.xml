@@ -117,7 +117,7 @@
                             android:layout_height="20dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_label"
-                            android:tint="@color/primary"
+                            app:tint="@color/primary"
                             android:contentDescription="@null" />
                     </FrameLayout>
 
@@ -239,7 +239,7 @@
                             android:layout_height="20dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_priority_high"
-                            android:tint="@color/error"
+                            app:tint="@color/error"
                             android:contentDescription="@null" />
                     </FrameLayout>
 
