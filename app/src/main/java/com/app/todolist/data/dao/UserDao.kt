@@ -14,4 +14,8 @@ interface UserDao {
     // Untuk proses Login (mencari user berdasarkan email)
     @Query("SELECT * FROM user_table WHERE email = :email LIMIT 1")
     suspend fun getUserByEmail(email: String): User?
+
+    // Untuk cek apakah username sudah dipakai user lain saat Register
+    @Query("SELECT * FROM user_table WHERE username = :username LIMIT 1")
+    suspend fun getUserByUsername(username: String): User?
 }
