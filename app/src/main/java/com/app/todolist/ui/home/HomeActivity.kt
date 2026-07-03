@@ -10,6 +10,7 @@ import com.app.todolist.data.repository.NotificationRepository
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.data.repository.UserRepository
 import com.app.todolist.databinding.ActivityMainBinding
+import com.app.todolist.ui.auth.LoginActivity
 import com.app.todolist.ui.notification.NotificationListActivity
 import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.TaskListActivity
@@ -22,6 +23,14 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Session guard: pastikan ada user yang login sebelum lanjut render Home
+        if (UserRepository.getCurrentUser() == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -42,7 +51,7 @@ class HomeActivity : AppCompatActivity() {
     // ── User greeting ─────────────────────────────────────────────────────────
 
     private fun setupUserGreeting() {
-        val firstName = UserRepository.getCurrentUser().name.split(" ").first()
+        val firstName = UserRepository.getCurrentUser()?.name?.split(" ")?.first().orEmpty()
         binding.tvGreeting.text = "Halo, $firstName 👋"
     }
 

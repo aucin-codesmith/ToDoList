@@ -1,20 +1,29 @@
 package com.app.todolist.ui.auth
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.app.todolist.R
+import androidx.lifecycle.lifecycleScope
+import com.app.todolist.data.AppDatabase
+import com.app.todolist.data.repository.UserRepository
 import com.app.todolist.databinding.ActivityLoginBinding
-import com.google.android.material.textfield.TextInputLayout
-import android.content.Intent
+import com.app.todolist.model.UserProfile
 import com.app.todolist.ui.home.HomeActivity
+import com.app.todolist.util.PasswordHasher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
+
+    // Inisialisasi database dan DAO secara lazy, sama seperti RegisterActivity
+    private val database by lazy { AppDatabase.getDatabase(this) }
+    private val userDao by lazy { database.userDao() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,12 +103,45 @@ class LoginActivity : AppCompatActivity() {
     // ─── Auth actions (UI-only placeholders) ──────────────────────────────────
 
     private fun performLogin() {
+        val email = binding.etEmail.text?.toString()?.trim().orEmpty()
+        val password = binding.etPassword.text?.toString().orEmpty()
+
         setLoginLoading(true)
-        binding.root.postDelayed({
-            setLoginLoading(false)
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()
-        }, 1_500)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val user = userDao.getUserByEmail(email)
+
+                val loginSuccess = user != null && PasswordHasher.verify(password, user.password)
+
+                withContext(Dispatchers.Main) {
+                    setLoginLoading(false)
+
+                    if (loginSuccess && user != null) {
+                        // Simpan sesi user yang login ke UserRepository
+                        UserRepository.setCurrentUser(
+                            UserProfile(
+                                id = user.id,
+                                name = user.username,
+                                username = user.username,
+                                email = user.email
+                            )
+                        )
+                        startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+                        finish()
+                    } else {
+                        // Pesan generik: tidak membedakan "email tidak ada" vs "password salah"
+                        binding.tilPassword.error = "Email atau password salah"
+                        Toast.makeText(this@LoginActivity, "Login gagal", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    setLoginLoading(false)
+                    Toast.makeText(this@LoginActivity, "Terjadi kesalahan: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun onForgotPasswordClicked() {
@@ -108,13 +150,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun onRegisterClicked() {
-        // TODO: Navigate to RegisterActivity
-//        Toast.makeText(this, "Daftar Sekarang diklik", Toast.LENGTH_SHORT).show()
-        binding.root.postDelayed({
-            setLoginLoading(false)
-            startActivity(Intent(this, RegisterActivity::class.java))
-            finish()
-        }, 1_500)
+        startActivity(Intent(this, RegisterActivity::class.java))
+        finish()
     }
 
     // ─── Loading state ────────────────────────────────────────────────────────

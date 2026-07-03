@@ -20,6 +20,14 @@ class ProfileActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Session guard: pastikan ada user yang login sebelum lanjut render Profile
+        if (UserRepository.getCurrentUser() == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -37,7 +45,7 @@ class ProfileActivity : AppCompatActivity() {
     // ── User info dari UserRepository ─────────────────────────────────────────
 
     private fun setupUserInfo() {
-        val user = UserRepository.getCurrentUser()
+        val user = UserRepository.getCurrentUser() ?: return
 
         // Avatar initials (2 huruf pertama nama)
         binding.tvAvatarInitials.text = user.avatarInitials
@@ -115,6 +123,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun performLogout() {
+        UserRepository.clearCurrentUser()
         val intent = Intent(this, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
