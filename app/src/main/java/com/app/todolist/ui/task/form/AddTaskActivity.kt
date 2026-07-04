@@ -10,10 +10,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.app.todolist.MainActivity
 import com.app.todolist.R
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityAddTaskBinding
 import com.app.todolist.model.TaskItem
+import com.app.todolist.util.TaskDateFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -21,11 +23,6 @@ import java.util.Calendar
 class AddTaskActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTaskBinding
-
-    private val monthAbbrev = arrayOf(
-        "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-        "Jul", "Ags", "Sep", "Okt", "Nov", "Des"
-    )
 
     private var selectedDeadline: Calendar? = null
     private var selectedPriority: String = "Sedang" // default
@@ -131,59 +128,13 @@ class AddTaskActivity : AppCompatActivity() {
                 picked.set(Calendar.HOUR_OF_DAY, hour)
                 picked.set(Calendar.MINUTE, minute)
                 selectedDeadline = picked
-                binding.etDeadline.setText(formatDeadlineDisplay(picked))
+                binding.etDeadline.setText(TaskDateFormatter.formatDeadlineDisplay(picked))
                 binding.tilDeadline.error = null
             },
             now.get(Calendar.HOUR_OF_DAY),
             now.get(Calendar.MINUTE),
             true
         ).show()
-    }
-
-    private fun formatDeadlineDisplay(cal: Calendar): String {
-        val day = cal.get(Calendar.DAY_OF_MONTH)
-        val month = monthAbbrev[cal.get(Calendar.MONTH)]
-        val year = cal.get(Calendar.YEAR)
-        val time = "%02d:%02d".format(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
-        return "%02d %s %d, %s".format(day, month, year, time)
-    }
-
-    /** Format "date" pendek buat HomeActivity, contoh: "29 Apr, 2026" */
-    private fun formatDateShort(cal: Calendar): String {
-        val day = cal.get(Calendar.DAY_OF_MONTH)
-        val month = monthAbbrev[cal.get(Calendar.MONTH)]
-        val year = cal.get(Calendar.YEAR)
-        return "%02d %s, %d".format(day, month, year)
-    }
-
-    /** Format "dateTime" relatif buat TaskListActivity, contoh: "Hari ini, 14:00" */
-    private fun formatDateTimeRelative(cal: Calendar): String {
-        val today = Calendar.getInstance()
-        val diffDays = daysBetween(today, cal)
-        val time = "%02d:%02d".format(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
-
-        val label = when (diffDays) {
-            0 -> "Hari ini"
-            1 -> "Besok"
-            2 -> "Lusa"
-            else -> {
-                val day = cal.get(Calendar.DAY_OF_MONTH)
-                val month = monthAbbrev[cal.get(Calendar.MONTH)]
-                "%02d %s".format(day, month)
-            }
-        }
-        return "$label, $time"
-    }
-
-    private fun daysBetween(from: Calendar, to: Calendar): Int {
-        val start = Calendar.getInstance().apply {
-            set(from.get(Calendar.YEAR), from.get(Calendar.MONTH), from.get(Calendar.DAY_OF_MONTH), 0, 0, 0)
-        }
-        val end = Calendar.getInstance().apply {
-            set(to.get(Calendar.YEAR), to.get(Calendar.MONTH), to.get(Calendar.DAY_OF_MONTH), 0, 0, 0)
-        }
-        val diffMillis = end.timeInMillis - start.timeInMillis
-        return (diffMillis / (1000 * 60 * 60 * 24)).toInt()
     }
 
     // ── Simpan ───────────────────────────────────────────────────────────────
@@ -212,8 +163,8 @@ class AddTaskActivity : AppCompatActivity() {
             title = title,
             category = getSelectedCategory(),
             description = description,
-            dateTime = formatDateTimeRelative(deadline),
-            date = formatDateShort(deadline),
+            dateTime = TaskDateFormatter.formatDateTimeRelative(deadline),
+            date = TaskDateFormatter.formatDateShort(deadline),
             priority = selectedPriority,
             assigneeTag = null,
             isCompleted = false
@@ -237,21 +188,27 @@ class AddTaskActivity : AppCompatActivity() {
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    finish() // Tutup halaman ini
-                    true
-                }
-                R.id.nav_tasks -> {
-                    finish() // Tutup halaman ini
-                    true
-                }
+                R.id.nav_home -> { goToMainTab(R.id.nav_home); true }
+                R.id.nav_tasks -> { goToMainTab(R.id.nav_tasks); true }
                 R.id.nav_add -> true
-                R.id.nav_profile -> {
-                    finish() // Tutup halaman ini
-                    true
-                }
+                R.id.nav_profile -> { goToMainTab(R.id.nav_profile); true }
                 else -> false
             }
         }
+    }
+
+    /**
+     * Balik ke MainActivity (yang sudah ada di back stack di bawah AddTaskActivity ini)
+     * dan minta dia menampilkan tab tertentu. FLAG_ACTIVITY_CLEAR_TOP + SINGLE_TOP
+     * memastikan instance MainActivity yang sudah ada dipakai ulang (lewat onNewIntent),
+     * bukan bikin instance baru.
+     */
+    private fun goToMainTab(tabId: Int) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra(MainActivity.EXTRA_SELECTED_TAB, tabId)
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        startActivity(intent)
+        finish()
     }
 }
