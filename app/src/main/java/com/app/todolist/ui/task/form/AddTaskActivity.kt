@@ -15,7 +15,9 @@ import com.app.todolist.R
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityAddTaskBinding
 import com.app.todolist.model.TaskItem
+import com.app.todolist.util.CategoryChipHelper
 import com.app.todolist.util.TaskDateFormatter
+import com.google.android.material.chip.Chip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -78,21 +80,16 @@ class AddTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ── Kategori chip ("+" belum didukung, hanya placeholder) ───────────────────
+    // ── Kategori chip (termasuk kategori kustom lewat chip "+") ─────────────────
 
     private fun setupCategoryChips() {
-        binding.chipTambah.setOnClickListener {
-            Toast.makeText(this, "Kategori kustom belum tersedia", Toast.LENGTH_SHORT).show()
-            binding.chipPribadi.isChecked = true
-        }
+        CategoryChipHelper.setupAddCategoryChip(this, binding.chipGroupCategory, binding.chipTambah)
     }
 
     private fun getSelectedCategory(): String {
-        return when (binding.chipGroupCategory.checkedChipId) {
-            binding.chipKerja.id -> "Kerja"
-            binding.chipBelajar.id -> "Belajar"
-            else -> "Pribadi"
-        }
+        val checkedId = binding.chipGroupCategory.checkedChipId
+        val chip = binding.chipGroupCategory.findViewById<Chip>(checkedId)
+        return chip?.text?.toString() ?: "Pribadi"
     }
 
     // ── Deadline picker (Date lalu Time) ────────────────────────────────────────
