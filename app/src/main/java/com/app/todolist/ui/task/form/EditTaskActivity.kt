@@ -6,15 +6,22 @@ import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.app.todolist.R
+import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityEditTaskBinding
+import com.app.todolist.model.TaskItem
+import com.app.todolist.util.TaskDateFormatter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 class EditTaskActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityEditTaskBinding
 
-    // ─── Extras dari DetailTaskActivity ──────────────────────────────────────
+    // ─── Extras dari DetailTaskActivity (dipakai sebagai fallback / id lookup) ──
 
     companion object {
         const val EXTRA_TASK_ID        = "extra_task_id"
@@ -28,6 +35,14 @@ class EditTaskActivity : AppCompatActivity() {
     private var taskId: Int = -1
     private var selectedPriority = "Sedang"
 
+    // Data asli dari Room — jadi basis saat menyimpan perubahan (assigneeTag,
+    // isCompleted, dll ikut dipertahankan walau tidak ada field-nya di form ini)
+    private var originalTask: TaskItem? = null
+
+    // Diisi hanya kalau user benar-benar ganti deadline lewat date/time picker.
+    // Kalau null saat simpan, deadline lama (originalTask.date/dateTime) dipakai apa adanya.
+    private var selectedDeadlineCalendar: Calendar? = null
+
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,11 +50,13 @@ class EditTaskActivity : AppCompatActivity() {
         binding = ActivityEditTaskBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        taskId = intent.getIntExtra(EXTRA_TASK_ID, -1)
+
         setupToolbar()
         setupPriorityToggle()
         setupDeadlinePicker()
         setupSaveButton()
-        loadIntentData()
+        loadTaskData()
     }
 
     // ─── Toolbar ──────────────────────────────────────────────────────────────
@@ -50,32 +67,50 @@ class EditTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ─── Load data dari Intent ────────────────────────────────────────────────
+    // ─── Load data asli dari Room ─────────────────────────────────────────────
 
-    private fun loadIntentData() {
-        taskId = intent.getIntExtra(EXTRA_TASK_ID, -1)
-
-        val title     = intent.getStringExtra(EXTRA_TASK_TITLE)     ?: ""
-        val deskripsi = intent.getStringExtra(EXTRA_TASK_DESKRIPSI) ?: ""
-        val kategori  = intent.getStringExtra(EXTRA_TASK_KATEGORI)  ?: "Pribadi"
-        val deadline  = intent.getStringExtra(EXTRA_TASK_DEADLINE)  ?: ""
-        val prioritas = intent.getStringExtra(EXTRA_TASK_PRIORITAS) ?: "Sedang"
-
-        // Isi form dengan data yang sudah ada
-        binding.etTitle.setText(title)
-        binding.etDesc.setText(deskripsi)
-        binding.etDeadline.setText(deadline)
-
-        // Set kategori chip yang sesuai
-        val chipId = when (kategori.lowercase()) {
-            "kerja"   -> R.id.chipKerja
-            "belajar" -> R.id.chipBelajar
-            else      -> R.id.chipPribadi
+    private fun loadTaskData() {
+        if (taskId == -1) {
+            Toast.makeText(this, "Tugas tidak ditemukan", Toast.LENGTH_SHORT).show()
+            finish()
+            return
         }
-        binding.chipGroupCategory.check(chipId)
 
-        // Set prioritas yang sesuai
-        selectPriority(prioritas)
+        binding.btnSave.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val task = TaskRepository.getTaskItemById(applicationContext, taskId)
+
+            withContext(Dispatchers.Main) {
+                binding.btnSave.isEnabled = true
+
+                if (task == null) {
+                    Toast.makeText(
+                        this@EditTaskActivity,
+                        "Tugas sudah tidak tersedia (mungkin sudah dihapus)",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    finish()
+                    return@withContext
+                }
+
+                originalTask = task
+
+                // Isi form dengan data asli
+                binding.etTitle.setText(task.title)
+                binding.etDesc.setText(task.description)
+                binding.etDeadline.setText(task.dateTime)
+
+                val chipId = when (task.category.lowercase()) {
+                    "kerja"   -> R.id.chipKerja
+                    "belajar" -> R.id.chipBelajar
+                    else      -> R.id.chipPribadi
+                }
+                binding.chipGroupCategory.check(chipId)
+
+                selectPriority(task.priority)
+            }
+        }
     }
 
     // ─── Priority Toggle ──────────────────────────────────────────────────────
@@ -115,26 +150,36 @@ class EditTaskActivity : AppCompatActivity() {
     }
 
     private fun showDatePicker() {
-        val cal = Calendar.getInstance()
+        val now = Calendar.getInstance()
         DatePickerDialog(
             this,
-            { _, year, month, day -> showTimePicker(year, month, day) },
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH),
-            cal.get(Calendar.DAY_OF_MONTH)
+            { _, year, month, dayOfMonth ->
+                val picked = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, year)
+                    set(Calendar.MONTH, month)
+                    set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                }
+                showTimePicker(picked)
+            },
+            now.get(Calendar.YEAR),
+            now.get(Calendar.MONTH),
+            now.get(Calendar.DAY_OF_MONTH)
         ).show()
     }
 
-    private fun showTimePicker(year: Int, month: Int, day: Int) {
-        val cal = Calendar.getInstance()
+    private fun showTimePicker(picked: Calendar) {
+        val now = Calendar.getInstance()
         TimePickerDialog(
             this,
             { _, hour, minute ->
-                val formatted = "%02d/%02d/%d %02d:%02d".format(day, month + 1, year, hour, minute)
-                binding.etDeadline.setText(formatted)
+                picked.set(Calendar.HOUR_OF_DAY, hour)
+                picked.set(Calendar.MINUTE, minute)
+                selectedDeadlineCalendar = picked
+                binding.etDeadline.setText(TaskDateFormatter.formatDeadlineDisplay(picked))
+                binding.tilDeadline.error = null
             },
-            cal.get(Calendar.HOUR_OF_DAY),
-            cal.get(Calendar.MINUTE),
+            now.get(Calendar.HOUR_OF_DAY),
+            now.get(Calendar.MINUTE),
             true
         ).show()
     }
@@ -158,19 +203,41 @@ class EditTaskActivity : AppCompatActivity() {
     }
 
     private fun saveTask() {
+        val original = originalTask
+        if (original == null) {
+            Toast.makeText(this, "Data tugas belum siap, coba lagi sebentar", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val title    = binding.etTitle.text?.toString()?.trim().orEmpty()
         val desc     = binding.etDesc.text?.toString()?.trim().orEmpty()
-        val deadline = binding.etDeadline.text?.toString()?.trim().orEmpty()
         val category = getSelectedCategory()
 
-        // TODO: Update ke database melalui ViewModel/Repository menggunakan taskId
-        Toast.makeText(
-            this,
-            "Tugas \"$title\" diperbarui! [$category · $selectedPriority]",
-            Toast.LENGTH_SHORT
-        ).show()
+        // Kalau user tidak ganti deadline (selectedDeadlineCalendar null),
+        // pertahankan date/dateTime yang lama apa adanya.
+        val newDate = selectedDeadlineCalendar?.let { TaskDateFormatter.formatDateShort(it) }
+            ?: original.date
+        val newDateTime = selectedDeadlineCalendar?.let { TaskDateFormatter.formatDateTimeRelative(it) }
+            ?: original.dateTime
 
-        finish() // kembali ke DetailTaskActivity
+        val updated = original.copy(
+            title = title,
+            description = desc,
+            category = category,
+            priority = selectedPriority,
+            date = newDate,
+            dateTime = newDateTime
+        )
+
+        binding.btnSave.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            TaskRepository.updateTaskItem(applicationContext, updated)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@EditTaskActivity, "Tugas berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                finish() // kembali ke DetailTaskActivity
+            }
+        }
     }
 
     private fun getSelectedCategory(): String {
