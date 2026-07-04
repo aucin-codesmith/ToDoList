@@ -3,6 +3,7 @@ package com.app.todolist.ui.home
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.TaskAdapter
@@ -15,6 +16,7 @@ import com.app.todolist.ui.notification.NotificationListActivity
 import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.TaskListActivity
 import com.app.todolist.ui.task.form.AddTaskActivity
+import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
 
@@ -24,24 +26,32 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Session guard: pastikan ada user yang login sebelum lanjut render Home
-        if (UserRepository.getCurrentUser() == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-            return
+        lifecycleScope.launch {
+            // Coba pulihkan sesi (dari memory atau SharedPreferences+Room) sebelum
+            // memutuskan user harus login ulang atau tidak
+            val hasSession = UserRepository.restoreSessionIfNeeded(this@HomeActivity)
+            if (!hasSession) {
+                startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
+                finish()
+                return@launch
+            }
+
+            binding = ActivityMainBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+
+            setupUserGreeting()
+            setupRecyclerView()
+            updateSummaryCard()
+            setupClickListeners()
         }
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        setupUserGreeting()
-        setupRecyclerView()
-        updateSummaryCard()
-        setupClickListeners()
     }
 
     override fun onResume() {
         super.onResume()
+        // Guard: onCreate berjalan async (menunggu restore session), jadi onResume
+        // bisa terpanggil sebelum taskAdapter diinisialisasi
+        if (!::taskAdapter.isInitialized) return
+
         // Refresh data dari repository saat kembali dari halaman lain
         taskAdapter.updateTasks(TaskRepository.getRecentTasks())
         updateSummaryCard()

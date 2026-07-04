@@ -13,6 +13,7 @@ import com.app.todolist.databinding.ActivityLoginBinding
 import com.app.todolist.model.UserProfile
 import com.app.todolist.ui.home.HomeActivity
 import com.app.todolist.util.PasswordHasher
+import com.app.todolist.util.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,11 +28,23 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        setupInputListeners()
-        setupClickListeners()
+        lifecycleScope.launch {
+            // Kalau ternyata masih ada sesi valid (baru buka app lagi setelah login
+            // sebelumnya), langsung ke Home tanpa nampilin form login sama sekali
+            val hasSession = UserRepository.restoreSessionIfNeeded(this@LoginActivity)
+            if (hasSession) {
+                startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+                finish()
+                return@launch
+            }
+
+            binding = ActivityLoginBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+
+            setupInputListeners()
+            setupClickListeners()
+        }
     }
 
     // ─── Input validation listeners ───────────────────────────────────────────
@@ -118,7 +131,7 @@ class LoginActivity : AppCompatActivity() {
                     setLoginLoading(false)
 
                     if (loginSuccess && user != null) {
-                        // Simpan sesi user yang login ke UserRepository
+                        // Simpan sesi user yang login ke UserRepository (memory)
                         UserRepository.setCurrentUser(
                             UserProfile(
                                 id = user.id,
@@ -127,6 +140,9 @@ class LoginActivity : AppCompatActivity() {
                                 email = user.email
                             )
                         )
+                        // Simpan userId ke SharedPreferences untuk auto-login
+                        SessionManager.saveUserId(this@LoginActivity, user.id)
+
                         startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
                         finish()
                     } else {

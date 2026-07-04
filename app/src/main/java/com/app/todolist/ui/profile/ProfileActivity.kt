@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.app.todolist.R
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.data.repository.UserRepository
@@ -13,6 +14,8 @@ import com.app.todolist.ui.auth.LoginActivity
 import com.app.todolist.ui.home.HomeActivity
 import com.app.todolist.ui.task.TaskListActivity
 import com.app.todolist.ui.task.form.AddTaskActivity
+import com.app.todolist.util.SessionManager
+import kotlinx.coroutines.launch
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -21,23 +24,27 @@ class ProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Session guard: pastikan ada user yang login sebelum lanjut render Profile
-        if (UserRepository.getCurrentUser() == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-            return
+        lifecycleScope.launch {
+            val hasSession = UserRepository.restoreSessionIfNeeded(this@ProfileActivity)
+            if (!hasSession) {
+                startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
+                finish()
+                return@launch
+            }
+
+            binding = ActivityProfileBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+
+            setupUserInfo()
+            setupClickListeners()
+            setupBottomNav()
         }
-
-        binding = ActivityProfileBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        setupUserInfo()
-        setupClickListeners()
-        setupBottomNav()
     }
 
     override fun onResume() {
         super.onResume()
+        // Guard: onCreate berjalan async (menunggu restore session)
+        if (!::binding.isInitialized) return
         // Refresh stats saat kembali dari halaman lain (misal task baru ditambah)
         updateStats()
     }
@@ -124,6 +131,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun performLogout() {
         UserRepository.clearCurrentUser()
+        SessionManager.clear(this)
         val intent = Intent(this, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
