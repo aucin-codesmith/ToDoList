@@ -6,25 +6,30 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.TaskListAdapter
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityTaskListBinding
+import com.app.todolist.model.TaskItem
 import com.app.todolist.ui.home.HomeActivity
 import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.form.AddTaskActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TaskListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTaskListBinding
-    private lateinit var adapter: TaskListAdapter
+    private lateinit var taskListAdapter: TaskListAdapter
 
-    private var currentFilter = FilterType.ACTIVE
-    private var searchQuery   = ""
-
-    enum class FilterType { ACTIVE, COMPLETED, ALL }
+    private var allTasks: List<TaskItem> = emptyList()
+    private var currentFilter: String = "aktif" // "aktif" | "selesai" | "semua"
+    private var currentQuery: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,120 +37,135 @@ class TaskListActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupRecyclerView()
+        setupFilterTabs()
         setupSearch()
-        setupFilters()
         setupClickListeners()
-        selectFilter(FilterType.ACTIVE)
+        setupBottomNav()
+
+        selectFilter("aktif")
+        loadTasks()
     }
 
     override fun onResume() {
         super.onResume()
-        applyFilter()
+        if (::taskListAdapter.isInitialized) loadTasks()
     }
 
+    // ── RecyclerView ──────────────────────────────────────────────────────────
+
     private fun setupRecyclerView() {
-        adapter = TaskListAdapter(
+        taskListAdapter = TaskListAdapter(
             tasks = mutableListOf(),
             onCheckedChange = { task, isChecked ->
-                TaskRepository.updateTaskItemCompleted(task.id, isChecked)
-                applyFilter()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    TaskRepository.updateTaskItemCompleted(applicationContext, task.id, isChecked)
+                    withContext(Dispatchers.Main) { loadTasks() }
+                }
             },
-            onItemClick = { task -> openDetailTask(task.id) }
+            onItemClick = { task ->
+                // TODO: ganti ke DetailTaskActivity begitu Activity itu dibuat
+                Toast.makeText(this, "Buka detail: ${task.title}", Toast.LENGTH_SHORT).show()
+            }
         )
         binding.rvTasks.apply {
-            layoutManager            = LinearLayoutManager(this@TaskListActivity)
-            adapter                  = this@TaskListActivity.adapter
+            layoutManager = LinearLayoutManager(this@TaskListActivity)
+            adapter = taskListAdapter
             isNestedScrollingEnabled = false
         }
     }
 
+    // ── Load & filter data ───────────────────────────────────────────────────
+
+    private fun loadTasks() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val tasks = TaskRepository.getTaskItems(applicationContext)
+            withContext(Dispatchers.Main) {
+                allTasks = tasks
+                applyFilterAndSearch()
+            }
+        }
+    }
+
+    private fun applyFilterAndSearch() {
+        var result = when (currentFilter) {
+            "aktif" -> allTasks.filter { !it.isCompleted }
+            "selesai" -> allTasks.filter { it.isCompleted }
+            else -> allTasks
+        }
+        if (currentQuery.isNotBlank()) {
+            result = result.filter { it.title.contains(currentQuery, ignoreCase = true) }
+        }
+
+        taskListAdapter.updateTasks(result)
+
+        val isEmpty = result.isEmpty()
+        binding.rvTasks.visibility = if (isEmpty) View.GONE else View.VISIBLE
+        binding.layoutEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
+    }
+
+    // ── Search ────────────────────────────────────────────────────────────────
+
     private fun setupSearch() {
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                searchQuery = s?.toString()?.trim().orEmpty()
-                applyFilter()
+                currentQuery = s?.toString().orEmpty()
+                applyFilterAndSearch()
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
     }
 
-    private fun setupFilters() {
-        binding.btnFilterActive.setOnClickListener    { selectFilter(FilterType.ACTIVE) }
-        binding.btnFilterCompleted.setOnClickListener { selectFilter(FilterType.COMPLETED) }
-        binding.btnFilterAll.setOnClickListener       { selectFilter(FilterType.ALL) }
+    // ── Filter tabs (3 TextView manual) ──────────────────────────────────────
+
+    private fun setupFilterTabs() {
+        binding.btnFilterActive.setOnClickListener { selectFilter("aktif") }
+        binding.btnFilterCompleted.setOnClickListener { selectFilter("selesai") }
+        binding.btnFilterAll.setOnClickListener { selectFilter("semua") }
     }
+
+    private fun selectFilter(filter: String) {
+        currentFilter = filter
+        val tabs = listOf(
+            binding.btnFilterActive to "aktif",
+            binding.btnFilterCompleted to "selesai",
+            binding.btnFilterAll to "semua"
+        )
+        tabs.forEach { (tab, key) -> highlightFilterTab(tab, isSelected = key == filter) }
+        applyFilterAndSearch()
+    }
+
+    private fun highlightFilterTab(tab: TextView, isSelected: Boolean) {
+        if (isSelected) {
+            tab.setBackgroundResource(R.drawable.bg_chip_medium)
+            tab.setTextColor(resources.getColor(R.color.on_surface, theme))
+        } else {
+            tab.background = null
+            tab.setTextColor(resources.getColor(R.color.on_surface_variant, theme))
+        }
+    }
+
+    // ── Click listeners ───────────────────────────────────────────────────────
 
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, AddTaskActivity::class.java))
         }
+    }
+
+    // ── Bottom Nav ────────────────────────────────────────────────────────────
+
+    private fun setupBottomNav() {
+        binding.bottomNav.selectedItemId = R.id.nav_tasks
+
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home    -> { startActivity(Intent(this, HomeActivity::class.java)); finish(); true }
-                R.id.nav_tasks   -> true
-                R.id.nav_add     -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
-                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); true }
+                R.id.nav_home -> { startActivity(Intent(this, HomeActivity::class.java)); finish(); true }
+                R.id.nav_tasks -> true
+                R.id.nav_add -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
+                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); finish(); true }
                 else -> false
             }
         }
-        binding.bottomNav.selectedItemId = R.id.nav_tasks
-    }
-
-    private fun openDetailTask(taskId: Int) {
-        val task = TaskRepository.getTaskItemById(taskId) ?: return
-        val intent = Intent(this, DetailTaskActivity::class.java).apply {
-            putExtra(DetailTaskActivity.EXTRA_TASK_ID,        task.id)
-            putExtra(DetailTaskActivity.EXTRA_TASK_TITLE,     task.title)
-            putExtra(DetailTaskActivity.EXTRA_TASK_STATUS,    if (task.isCompleted) "selesai" else "belum_selesai")
-            putExtra(DetailTaskActivity.EXTRA_TASK_KATEGORI,  task.category)
-            putExtra(DetailTaskActivity.EXTRA_TASK_DEADLINE,  task.dateTime)
-            putExtra(DetailTaskActivity.EXTRA_TASK_PRIORITAS, task.priority)
-            putExtra(DetailTaskActivity.EXTRA_TASK_DESKRIPSI, task.description)
-        }
-        startActivity(intent)
-    }
-
-    private fun selectFilter(type: FilterType) {
-        currentFilter = type
-        updateFilterUI()
-        applyFilter()
-    }
-
-    private fun updateFilterUI() {
-        listOf(
-            binding.btnFilterActive    to FilterType.ACTIVE,
-            binding.btnFilterCompleted to FilterType.COMPLETED,
-            binding.btnFilterAll       to FilterType.ALL
-        ).forEach { (tv, type) ->
-            val textView = tv as TextView
-            if (type == currentFilter) {
-                textView.setBackgroundResource(R.drawable.bg_filter_selected)
-                textView.setTextColor(getColor(R.color.white))
-            } else {
-                textView.setBackgroundResource(R.drawable.bg_filter_unselected)
-                textView.setTextColor(getColor(R.color.on_surface_variant))
-            }
-        }
-    }
-
-    private fun applyFilter() {
-        val allTasks = TaskRepository.getTaskItems()
-        val filtered = allTasks
-            .filter { task ->
-                when (currentFilter) {
-                    FilterType.ACTIVE    -> !task.isCompleted
-                    FilterType.COMPLETED ->  task.isCompleted
-                    FilterType.ALL       -> true
-                }
-            }
-            .filter { task ->
-                searchQuery.isEmpty() || task.title.contains(searchQuery, ignoreCase = true)
-            }
-
-        adapter.updateTasks(filtered)
-        val isEmpty = filtered.isEmpty()
-        binding.layoutEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
-        binding.rvTasks.visibility     = if (isEmpty) View.GONE    else View.VISIBLE
     }
 }

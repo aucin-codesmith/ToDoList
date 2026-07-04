@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
@@ -12,6 +13,7 @@ import android.widget.TextView
 import com.app.todolist.R
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.ui.task.form.EditTaskActivity
+import kotlinx.coroutines.launch
 
 class DetailTaskActivity : AppCompatActivity() {
 
@@ -66,20 +68,22 @@ class DetailTaskActivity : AppCompatActivity() {
         super.onResume()
         // Reload dari repository agar perubahan dari EditTaskActivity langsung terlihat
         if (taskId != -1) {
-            TaskRepository.getTaskItemById(taskId)?.let { task ->
-                currentTitle     = task.title
-                currentKategori  = task.category
-                currentDeadline  = task.dateTime
-                currentPrioritas = task.priority
-                currentDeskripsi = task.description
-                isCompleted      = task.isCompleted
+            lifecycleScope.launch {
+                TaskRepository.getTaskItemById(this@DetailTaskActivity, taskId)?.let { task ->
+                    currentTitle     = task.title
+                    currentKategori  = task.category
+                    currentDeadline  = task.dateTime
+                    currentPrioritas = task.priority
+                    currentDeskripsi = task.description
+                    isCompleted      = task.isCompleted
 
-                tvTaskTitle.text = currentTitle
-                tvKategori.text  = currentKategori
-                tvDeadline.text  = currentDeadline
-                tvPrioritas.text = currentPrioritas.replaceFirstChar { it.uppercase() }
-                tvDeskripsi.text = currentDeskripsi
-                applyStatus(if (isCompleted) "selesai" else "belum_selesai")
+                    tvTaskTitle.text = currentTitle
+                    tvKategori.text  = currentKategori
+                    tvDeadline.text  = currentDeadline
+                    tvPrioritas.text = currentPrioritas.replaceFirstChar { it.uppercase() }
+                    tvDeskripsi.text = currentDeskripsi
+                    applyStatus(if (isCompleted) "selesai" else "belum_selesai")
+                }
             }
         }
     }
@@ -154,7 +158,9 @@ class DetailTaskActivity : AppCompatActivity() {
     private fun toggleTaskStatus() {
         isCompleted = !isCompleted
         // Langsung update di repository agar semua Activity mendapat data terbaru
-        TaskRepository.updateTaskItemCompleted(taskId, isCompleted)
+        lifecycleScope.launch {
+            TaskRepository.updateTaskItemCompleted(this@DetailTaskActivity, taskId, isCompleted)
+        }
         applyStatus(if (isCompleted) "selesai" else "belum_selesai")
         val message = if (isCompleted) "Tugas ditandai selesai" else "Tugas ditandai belum selesai"
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -183,8 +189,10 @@ class DetailTaskActivity : AppCompatActivity() {
 
     private fun deleteTask() {
         // Hapus dari repository agar data konsisten di semua Activity
-        TaskRepository.deleteTaskItem(taskId)
-        Toast.makeText(this, "Tugas dihapus", Toast.LENGTH_SHORT).show()
-        finish()
+        lifecycleScope.launch {
+            TaskRepository.deleteTaskItem(this@DetailTaskActivity, taskId)
+            Toast.makeText(this@DetailTaskActivity, "Tugas dihapus", Toast.LENGTH_SHORT).show()
+            finish()
+        }
     }
 }

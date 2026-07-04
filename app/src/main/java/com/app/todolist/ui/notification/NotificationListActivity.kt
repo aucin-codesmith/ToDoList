@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.NotificationAdapter
@@ -16,6 +17,7 @@ import com.app.todolist.ui.home.HomeActivity
 import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.TaskListActivity
 import com.app.todolist.ui.task.form.AddTaskActivity
+import kotlinx.coroutines.launch
 
 class NotificationListActivity : AppCompatActivity() {
 
@@ -52,7 +54,7 @@ class NotificationListActivity : AppCompatActivity() {
             // Tandai sudah dibaca lalu buka detail
             NotificationRepository.markAsRead(notif.id)
             applyFilter()
-            openDetailNotification(notif.id)
+            lifecycleScope.launch { openDetailNotification(notif.id) }
         }
         binding.rvNotifications.apply {
             layoutManager            = LinearLayoutManager(this@NotificationListActivity)
@@ -61,14 +63,14 @@ class NotificationListActivity : AppCompatActivity() {
         }
     }
 
-    private fun openDetailNotification(notifId: Int) {
+    private suspend fun openDetailNotification(notifId: Int) {
         val notif   = NotificationRepository.getNotificationById(notifId) ?: return
         val hasTask = notif.type == NotifType.DEADLINE ||
                 notif.type == NotifType.REMINDER ||
                 notif.type == NotifType.DONE
 
         // Resolve data task dari TaskRepository menggunakan taskId yang tersimpan di notif
-        val linkedTask = notif.taskId?.let { TaskRepository.getTaskItemById(it) }
+        val linkedTask = notif.taskId?.let { TaskRepository.getTaskItemById(this, it) }
 
         val intent = Intent(this, DetailNotificationActivity::class.java).apply {
             putExtra(DetailNotificationActivity.EXTRA_NOTIF_ID,       notif.id)

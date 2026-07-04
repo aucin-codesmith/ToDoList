@@ -11,6 +11,7 @@ import com.app.todolist.data.repository.NotificationRepository
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.data.repository.UserRepository
 import com.app.todolist.databinding.ActivityMainBinding
+import com.app.todolist.model.TaskItem
 import com.app.todolist.ui.auth.LoginActivity
 import com.app.todolist.ui.notification.NotificationListActivity
 import com.app.todolist.ui.profile.ProfileActivity
@@ -40,7 +41,7 @@ class HomeActivity : AppCompatActivity() {
             setContentView(binding.root)
 
             setupUserGreeting()
-            setupRecyclerView()
+            setupRecyclerView(TaskRepository.getRecentTasks(this@HomeActivity))
             updateSummaryCard()
             setupClickListeners()
         }
@@ -52,10 +53,12 @@ class HomeActivity : AppCompatActivity() {
         // bisa terpanggil sebelum taskAdapter diinisialisasi
         if (!::taskAdapter.isInitialized) return
 
-        // Refresh data dari repository saat kembali dari halaman lain
-        taskAdapter.updateTasks(TaskRepository.getRecentTasks())
-        updateSummaryCard()
-        updateNotifBadge()
+        lifecycleScope.launch {
+            // Refresh data dari repository saat kembali dari halaman lain
+            taskAdapter.updateTasks(TaskRepository.getRecentTasks(this@HomeActivity))
+            updateSummaryCard()
+            updateNotifBadge()
+        }
     }
 
     // ── User greeting ─────────────────────────────────────────────────────────
@@ -67,12 +70,14 @@ class HomeActivity : AppCompatActivity() {
 
     // ── RecyclerView ──────────────────────────────────────────────────────────
 
-    private fun setupRecyclerView() {
+    private fun setupRecyclerView(initialTasks: List<TaskItem>) {
         taskAdapter = TaskAdapter(
-            tasks = TaskRepository.getRecentTasks().toMutableList()
+            tasks = initialTasks.toMutableList()
         ) { task, isChecked ->
-            TaskRepository.updateTaskItemCompleted(task.id, isChecked)
-            updateSummaryCard()
+            lifecycleScope.launch {
+                TaskRepository.updateTaskItemCompleted(this@HomeActivity, task.id, isChecked)
+                updateSummaryCard()
+            }
         }
         binding.rvTasks.apply {
             layoutManager            = LinearLayoutManager(this@HomeActivity)
@@ -83,10 +88,10 @@ class HomeActivity : AppCompatActivity() {
 
     // ── Summary card ──────────────────────────────────────────────────────────
 
-    private fun updateSummaryCard() {
-        val total     = TaskRepository.getTotalCount()
-        val completed = TaskRepository.getCompletedCount()
-        val remaining = TaskRepository.getRemainingCount()
+    private suspend fun updateSummaryCard() {
+        val total     = TaskRepository.getTotalCount(this)
+        val completed = TaskRepository.getCompletedCount(this)
+        val remaining = TaskRepository.getRemainingCount(this)
 
         binding.tvTaskCount.text    = "$total Tugas Hari Ini"
         binding.tvTaskProgress.text = "$completed selesai · $remaining tersisa"

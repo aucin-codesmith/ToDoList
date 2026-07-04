@@ -46,12 +46,12 @@ class ProfileActivity : AppCompatActivity() {
         // Guard: onCreate berjalan async (menunggu restore session)
         if (!::binding.isInitialized) return
         // Refresh stats saat kembali dari halaman lain (misal task baru ditambah)
-        updateStats()
+        lifecycleScope.launch { updateStats() }
     }
 
     // ── User info dari UserRepository ─────────────────────────────────────────
 
-    private fun setupUserInfo() {
+    private suspend fun setupUserInfo() {
         val user = UserRepository.getCurrentUser() ?: return
 
         // Avatar initials (2 huruf pertama nama)
@@ -70,10 +70,10 @@ class ProfileActivity : AppCompatActivity() {
         updateStats()
     }
 
-    private fun updateStats() {
-        val total     = TaskRepository.getTotalCount()
-        val completed = TaskRepository.getCompletedCount()
-        val active    = TaskRepository.getRemainingCount()
+    private suspend fun updateStats() {
+        val total     = TaskRepository.getTotalCount(this)
+        val completed = TaskRepository.getCompletedCount(this)
+        val active    = TaskRepository.getRemainingCount(this)
 
         binding.tvStatTotal.text     = total.toString()
         binding.tvStatCompleted.text = completed.toString()
