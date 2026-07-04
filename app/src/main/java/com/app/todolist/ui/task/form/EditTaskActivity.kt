@@ -11,7 +11,9 @@ import com.app.todolist.R
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityEditTaskBinding
 import com.app.todolist.model.TaskItem
+import com.app.todolist.util.CategoryChipHelper
 import com.app.todolist.util.TaskDateFormatter
+import com.google.android.material.chip.Chip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,6 +58,7 @@ class EditTaskActivity : AppCompatActivity() {
         setupPriorityToggle()
         setupDeadlinePicker()
         setupSaveButton()
+        CategoryChipHelper.setupAddCategoryChip(this, binding.chipGroupCategory, binding.chipTambah)
         loadTaskData()
     }
 
@@ -101,12 +104,21 @@ class EditTaskActivity : AppCompatActivity() {
                 binding.etDesc.setText(task.description)
                 binding.etDeadline.setText(task.dateTime)
 
-                val chipId = when (task.category.lowercase()) {
+                val builtInChipId = when (task.category.lowercase()) {
                     "kerja"   -> R.id.chipKerja
                     "belajar" -> R.id.chipBelajar
-                    else      -> R.id.chipPribadi
+                    "pribadi" -> R.id.chipPribadi
+                    else      -> null
                 }
-                binding.chipGroupCategory.check(chipId)
+                if (builtInChipId != null) {
+                    binding.chipGroupCategory.check(builtInChipId)
+                } else {
+                    // Kategori task ini kustom (bukan Pribadi/Kerja/Belajar bawaan) —
+                    // tambahkan sebagai chip baru supaya kelihatan & tetap terpilih
+                    CategoryChipHelper.addOrSelectChip(
+                        binding.chipGroupCategory, binding.chipTambah, task.category
+                    )
+                }
 
                 selectPriority(task.priority)
             }
@@ -241,10 +253,8 @@ class EditTaskActivity : AppCompatActivity() {
     }
 
     private fun getSelectedCategory(): String {
-        return when (binding.chipGroupCategory.checkedChipId) {
-            R.id.chipKerja   -> "Kerja"
-            R.id.chipBelajar -> "Belajar"
-            else             -> "Pribadi"
-        }
+        val checkedId = binding.chipGroupCategory.checkedChipId
+        val chip = binding.chipGroupCategory.findViewById<Chip>(checkedId)
+        return chip?.text?.toString() ?: "Pribadi"
     }
 }
