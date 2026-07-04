@@ -2,46 +2,54 @@ package com.app.todolist.ui.home
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.app.todolist.R
+import com.app.todolist.R // Ini import yang baru ditambahkan
 import com.app.todolist.adapter.TaskAdapter
 import com.app.todolist.data.repository.NotificationRepository
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.data.repository.UserRepository
-import com.app.todolist.databinding.ActivityMainBinding
+import com.app.todolist.databinding.FragmentHomeBinding
 import com.app.todolist.model.TaskItem
 import com.app.todolist.ui.auth.LoginActivity
 import com.app.todolist.ui.notification.NotificationListActivity
-import com.app.todolist.ui.profile.ProfileActivity
-import com.app.todolist.ui.task.TaskListActivity
 import com.app.todolist.ui.task.form.AddTaskActivity
 import kotlinx.coroutines.launch
 
-class HomeActivity : AppCompatActivity() {
+class HomeFragment : Fragment() {
 
-    private lateinit var binding: ActivityMainBinding
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
     private lateinit var taskAdapter: TaskAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    // Inflate layout XML ke Fragment
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        lifecycleScope.launch {
-            // Coba pulihkan sesi (dari memory atau SharedPreferences+Room) sebelum
-            // memutuskan user harus login ulang atau tidak
-            val hasSession = UserRepository.restoreSessionIfNeeded(this@HomeActivity)
+    // Inisialisasi logika setelah view berhasil dibuat
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Coba pulihkan sesi (dari memory atau SharedPreferences+Room)
+            val hasSession = UserRepository.restoreSessionIfNeeded(requireContext())
             if (!hasSession) {
-                startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
-                finish()
+                startActivity(Intent(requireContext(), LoginActivity::class.java))
+                requireActivity().finish()
                 return@launch
             }
 
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding.root)
-
             setupUserGreeting()
-            setupRecyclerView(TaskRepository.getRecentTasks(this@HomeActivity))
+            setupRecyclerView(TaskRepository.getRecentTasks(requireContext()))
             updateSummaryCard()
             setupClickListeners()
         }
@@ -49,13 +57,12 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Guard: onCreate berjalan async (menunggu restore session), jadi onResume
-        // bisa terpanggil sebelum taskAdapter diinisialisasi
+        // Guard: onViewCreated berjalan async, jadi onResume bisa terpanggil duluan
         if (!::taskAdapter.isInitialized) return
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             // Refresh data dari repository saat kembali dari halaman lain
-            taskAdapter.updateTasks(TaskRepository.getRecentTasks(this@HomeActivity))
+            taskAdapter.updateTasks(TaskRepository.getRecentTasks(requireContext()))
             updateSummaryCard()
             updateNotifBadge()
         }
@@ -74,14 +81,14 @@ class HomeActivity : AppCompatActivity() {
         taskAdapter = TaskAdapter(
             tasks = initialTasks.toMutableList()
         ) { task, isChecked ->
-            lifecycleScope.launch {
-                TaskRepository.updateTaskItemCompleted(this@HomeActivity, task.id, isChecked)
+            viewLifecycleOwner.lifecycleScope.launch {
+                TaskRepository.updateTaskItemCompleted(requireContext(), task.id, isChecked)
                 updateSummaryCard()
             }
         }
         binding.rvTasks.apply {
-            layoutManager            = LinearLayoutManager(this@HomeActivity)
-            adapter                  = taskAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = taskAdapter
             isNestedScrollingEnabled = false
         }
     }
@@ -89,11 +96,11 @@ class HomeActivity : AppCompatActivity() {
     // ── Summary card ──────────────────────────────────────────────────────────
 
     private suspend fun updateSummaryCard() {
-        val total     = TaskRepository.getTotalCount(this)
-        val completed = TaskRepository.getCompletedCount(this)
-        val remaining = TaskRepository.getRemainingCount(this)
+        val total = TaskRepository.getTotalCount(requireContext())
+        val completed = TaskRepository.getCompletedCount(requireContext())
+        val remaining = TaskRepository.getRemainingCount(requireContext())
 
-        binding.tvTaskCount.text    = "$total Tugas Hari Ini"
+        binding.tvTaskCount.text = "$total Tugas Hari Ini"
         binding.tvTaskProgress.text = "$completed selesai · $remaining tersisa"
         binding.progressTasks.progress = if (total > 0) (completed * 100) / total else 0
     }
@@ -111,25 +118,23 @@ class HomeActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
-            startActivity(Intent(this, AddTaskActivity::class.java))
+            startActivity(Intent(requireContext(), AddTaskActivity::class.java))
         }
 
         binding.tvSeeAll.setOnClickListener {
-            startActivity(Intent(this, TaskListActivity::class.java))
+            // Kita "tembak" id bottomNav yang ada di MainActivity
+            val bottomNav = requireActivity().findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
+            bottomNav.selectedItemId = R.id.nav_tasks
         }
 
         binding.cvNotif.setOnClickListener {
-            startActivity(Intent(this, NotificationListActivity::class.java))
+            startActivity(Intent(requireContext(), NotificationListActivity::class.java))
         }
+    }
 
-        binding.bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home    -> true
-                R.id.nav_tasks   -> { startActivity(Intent(this, TaskListActivity::class.java)); true }
-                R.id.nav_add     -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
-                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); true }
-                else             -> false
-            }
-        }
+    // Hindari memory leak dengan membersihkan binding saat fragment dihancurkan
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

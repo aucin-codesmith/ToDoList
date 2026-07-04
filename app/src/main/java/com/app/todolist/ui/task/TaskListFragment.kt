@@ -4,42 +4,49 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.app.todolist.R
 import com.app.todolist.adapter.TaskListAdapter
 import com.app.todolist.data.repository.TaskRepository
-import com.app.todolist.databinding.ActivityTaskListBinding
+import com.app.todolist.databinding.FragmentTaskListBinding
 import com.app.todolist.model.TaskItem
-import com.app.todolist.ui.home.HomeActivity
-import com.app.todolist.ui.profile.ProfileActivity
 import com.app.todolist.ui.task.form.AddTaskActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TaskListActivity : AppCompatActivity() {
+class TaskListFragment : Fragment() {
 
-    private lateinit var binding: ActivityTaskListBinding
+    private var _binding: FragmentTaskListBinding? = null
+    private val binding get() = _binding!!
     private lateinit var taskListAdapter: TaskListAdapter
 
     private var allTasks: List<TaskItem> = emptyList()
     private var currentFilter: String = "aktif" // "aktif" | "selesai" | "semua"
     private var currentQuery: String = ""
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityTaskListBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentTaskListBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
         setupFilterTabs()
         setupSearch()
         setupClickListeners()
-        setupBottomNav()
+        // setupBottomNav() dihapus karena sudah diatur di MainActivity
 
         selectFilter("aktif")
         loadTasks()
@@ -56,8 +63,8 @@ class TaskListActivity : AppCompatActivity() {
         taskListAdapter = TaskListAdapter(
             tasks = mutableListOf(),
             onCheckedChange = { task, isChecked ->
-                lifecycleScope.launch(Dispatchers.IO) {
-                    TaskRepository.updateTaskItemCompleted(applicationContext, task.id, isChecked)
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    TaskRepository.updateTaskItemCompleted(requireContext(), task.id, isChecked)
                     withContext(Dispatchers.Main) { loadTasks() }
                 }
             },
@@ -66,14 +73,14 @@ class TaskListActivity : AppCompatActivity() {
             }
         )
         binding.rvTasks.apply {
-            layoutManager = LinearLayoutManager(this@TaskListActivity)
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = taskListAdapter
             isNestedScrollingEnabled = false
         }
     }
 
     private fun openDetailTask(task: TaskItem) {
-        val intent = Intent(this, DetailTaskActivity::class.java).apply {
+        val intent = Intent(requireContext(), DetailTaskActivity::class.java).apply {
             putExtra(DetailTaskActivity.EXTRA_TASK_ID, task.id)
             putExtra(DetailTaskActivity.EXTRA_TASK_TITLE, task.title)
             putExtra(
@@ -91,8 +98,8 @@ class TaskListActivity : AppCompatActivity() {
     // ── Load & filter data ───────────────────────────────────────────────────
 
     private fun loadTasks() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val tasks = TaskRepository.getTaskItems(applicationContext)
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val tasks = TaskRepository.getTaskItems(requireContext())
             withContext(Dispatchers.Main) {
                 allTasks = tasks
                 applyFilterAndSearch()
@@ -150,12 +157,13 @@ class TaskListActivity : AppCompatActivity() {
     }
 
     private fun highlightFilterTab(tab: TextView, isSelected: Boolean) {
+        // Menggunakan requireContext() agar tidak error di Fragment
         if (isSelected) {
             tab.setBackgroundResource(R.drawable.bg_chip_medium)
-            tab.setTextColor(resources.getColor(R.color.on_surface, theme))
+            tab.setTextColor(resources.getColor(R.color.on_surface, requireContext().theme))
         } else {
             tab.background = null
-            tab.setTextColor(resources.getColor(R.color.on_surface_variant, theme))
+            tab.setTextColor(resources.getColor(R.color.on_surface_variant, requireContext().theme))
         }
     }
 
@@ -163,23 +171,12 @@ class TaskListActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
-            startActivity(Intent(this, AddTaskActivity::class.java))
+            startActivity(Intent(requireContext(), AddTaskActivity::class.java))
         }
     }
 
-    // ── Bottom Nav ────────────────────────────────────────────────────────────
-
-    private fun setupBottomNav() {
-        binding.bottomNav.selectedItemId = R.id.nav_tasks
-
-        binding.bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> { startActivity(Intent(this, HomeActivity::class.java)); finish(); true }
-                R.id.nav_tasks -> true
-                R.id.nav_add -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
-                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); finish(); true }
-                else -> false
-            }
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

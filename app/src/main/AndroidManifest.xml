@@ -41,16 +41,6 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".ui.home.HomeActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".ui.task.TaskListActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".ui.task.DetailTaskActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
@@ -64,12 +54,6 @@
         android:name=".ui.task.form.EditTaskActivity"
         android:exported="false"
         android:screenOrientation="portrait" />
-
-        <!-- Profile Activity -->
-        <activity
-            android:name=".ui.profile.ProfileActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
 
         <!-- Notification Activity -->
         <activity

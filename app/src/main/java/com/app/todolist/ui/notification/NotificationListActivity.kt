@@ -13,9 +13,9 @@ import com.app.todolist.data.repository.NotificationRepository
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.model.NotifType
 import com.app.todolist.databinding.ActivityNotificationListBinding
-import com.app.todolist.ui.home.HomeActivity
-import com.app.todolist.ui.profile.ProfileActivity
-import com.app.todolist.ui.task.TaskListActivity
+import com.app.todolist.ui.home.HomeFragment
+import com.app.todolist.ui.profile.ProfileFragment
+import com.app.todolist.ui.task.TaskListFragment
 import com.app.todolist.ui.task.form.AddTaskActivity
 import kotlinx.coroutines.launch
 
@@ -143,10 +143,10 @@ class NotificationListActivity : AppCompatActivity() {
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home    -> { startActivity(Intent(this, HomeActivity::class.java)); finish(); true }
-                R.id.nav_tasks   -> { startActivity(Intent(this, TaskListActivity::class.java)); finish(); true }
+                R.id.nav_home    -> { startActivity(Intent(this, HomeFragment::class.java)); finish(); true }
+                R.id.nav_tasks   -> { startActivity(Intent(this, TaskListFragment::class.java)); finish(); true }
                 R.id.nav_add     -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
-                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); true }
+                R.id.nav_profile -> { startActivity(Intent(this, ProfileFragment::class.java)); true }
                 else -> false
             }
         }

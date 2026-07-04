@@ -11,7 +11,7 @@ import com.app.todolist.data.AppDatabase
 import com.app.todolist.data.repository.UserRepository
 import com.app.todolist.databinding.ActivityLoginBinding
 import com.app.todolist.model.UserProfile
-import com.app.todolist.ui.home.HomeActivity
+import com.app.todolist.MainActivity
 import com.app.todolist.util.PasswordHasher
 import com.app.todolist.util.SessionManager
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +34,7 @@ class LoginActivity : AppCompatActivity() {
             // sebelumnya), langsung ke Home tanpa nampilin form login sama sekali
             val hasSession = UserRepository.restoreSessionIfNeeded(this@LoginActivity)
             if (hasSession) {
-                startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                 finish()
                 return@launch
             }
@@ -143,7 +143,7 @@ class LoginActivity : AppCompatActivity() {
                         // Simpan userId ke SharedPreferences untuk auto-login
                         SessionManager.saveUserId(this@LoginActivity, user.id)
 
-                        startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                         finish()
                     } else {
                         // Pesan generik: tidak membedakan "email tidak ada" vs "password salah"

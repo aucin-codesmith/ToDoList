@@ -14,9 +14,6 @@ import com.app.todolist.R
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityAddTaskBinding
 import com.app.todolist.model.TaskItem
-import com.app.todolist.ui.home.HomeActivity
-import com.app.todolist.ui.profile.ProfileActivity
-import com.app.todolist.ui.task.TaskListActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -240,10 +237,19 @@ class AddTaskActivity : AppCompatActivity() {
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> { startActivity(Intent(this, HomeActivity::class.java)); finish(); true }
-                R.id.nav_tasks -> { startActivity(Intent(this, TaskListActivity::class.java)); finish(); true }
+                R.id.nav_home -> {
+                    finish() // Tutup halaman ini
+                    true
+                }
+                R.id.nav_tasks -> {
+                    finish() // Tutup halaman ini
+                    true
+                }
                 R.id.nav_add -> true
-                R.id.nav_profile -> { startActivity(Intent(this, ProfileActivity::class.java)); finish(); true }
+                R.id.nav_profile -> {
+                    finish() // Tutup halaman ini
+                    true
+                }
                 else -> false
             }
         }
