@@ -38,6 +38,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
         <activity
@@ -51,9 +52,9 @@
             android:screenOrientation="portrait" />
 
         <activity
-        android:name=".ui.task.form.EditTaskActivity"
-        android:exported="false"
-        android:screenOrientation="portrait" />
+            android:name=".ui.task.form.EditTaskActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <!-- Notification Activity -->
         <activity
