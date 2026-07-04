@@ -13,9 +13,7 @@ import com.app.todolist.data.repository.NotificationRepository
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.model.NotifType
 import com.app.todolist.databinding.ActivityNotificationListBinding
-import com.app.todolist.ui.home.HomeFragment
-import com.app.todolist.ui.profile.ProfileFragment
-import com.app.todolist.ui.task.TaskListFragment
+import com.app.todolist.MainActivity
 import com.app.todolist.ui.task.form.AddTaskActivity
 import kotlinx.coroutines.launch
 
@@ -143,12 +141,26 @@ class NotificationListActivity : AppCompatActivity() {
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home    -> { startActivity(Intent(this, HomeFragment::class.java)); finish(); true }
-                R.id.nav_tasks   -> { startActivity(Intent(this, TaskListFragment::class.java)); finish(); true }
+                R.id.nav_home    -> { goToMainTab(R.id.nav_home); true }
+                R.id.nav_tasks   -> { goToMainTab(R.id.nav_tasks); true }
                 R.id.nav_add     -> { startActivity(Intent(this, AddTaskActivity::class.java)); true }
-                R.id.nav_profile -> { startActivity(Intent(this, ProfileFragment::class.java)); true }
+                R.id.nav_profile -> { goToMainTab(R.id.nav_profile); true }
                 else -> false
             }
         }
+    }
+
+    /**
+     * Fragment (HomeFragment/TaskListFragment/ProfileFragment) TIDAK BISA dibuka
+     * lewat startActivity(Intent(...)) — itu bukan Activity. Yang benar: balik ke
+     * MainActivity (host fragment-fragment itu) sambil kasih tahu tab tujuannya.
+     */
+    private fun goToMainTab(tabId: Int) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra(MainActivity.EXTRA_SELECTED_TAB, tabId)
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        startActivity(intent)
+        finish()
     }
 }
