@@ -6,7 +6,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -63,8 +62,7 @@ class TaskListActivity : AppCompatActivity() {
                 }
             },
             onItemClick = { task ->
-                // TODO: ganti ke DetailTaskActivity begitu Activity itu dibuat
-                Toast.makeText(this, "Buka detail: ${task.title}", Toast.LENGTH_SHORT).show()
+                openDetailTask(task)
             }
         )
         binding.rvTasks.apply {
@@ -72,6 +70,22 @@ class TaskListActivity : AppCompatActivity() {
             adapter = taskListAdapter
             isNestedScrollingEnabled = false
         }
+    }
+
+    private fun openDetailTask(task: TaskItem) {
+        val intent = Intent(this, DetailTaskActivity::class.java).apply {
+            putExtra(DetailTaskActivity.EXTRA_TASK_ID, task.id)
+            putExtra(DetailTaskActivity.EXTRA_TASK_TITLE, task.title)
+            putExtra(
+                DetailTaskActivity.EXTRA_TASK_STATUS,
+                if (task.isCompleted) "selesai" else "belum_selesai"
+            )
+            putExtra(DetailTaskActivity.EXTRA_TASK_KATEGORI, task.category)
+            putExtra(DetailTaskActivity.EXTRA_TASK_DEADLINE, task.dateTime)
+            putExtra(DetailTaskActivity.EXTRA_TASK_PRIORITAS, task.priority)
+            putExtra(DetailTaskActivity.EXTRA_TASK_DESKRIPSI, task.description)
+        }
+        startActivity(intent)
     }
 
     // ── Load & filter data ───────────────────────────────────────────────────
