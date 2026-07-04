@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.app.todolist.R
 import com.app.todolist.MainActivity   // adjust if MainActivity is in a sub-package
 import com.app.todolist.ui.auth.LoginActivity
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
 
@@ -40,7 +42,7 @@ class SplashActivity : AppCompatActivity() {
             .setDuration(700)
             .start()
 
-        CoroutineScope(Dispatchers.Main).launch {
+        lifecycleScope.launch {
             delay(splashDuration)
             navigateToLogin()
         }
