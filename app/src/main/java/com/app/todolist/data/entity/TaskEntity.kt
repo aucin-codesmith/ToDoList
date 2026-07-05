@@ -14,5 +14,8 @@ data class TaskEntity(
     val date: String,
     val priority: String,
     val assigneeTag: String? = null,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    // Timestamp asli (epoch millis) dari deadline — dipakai buat jadwalin reminder.
+    // 0L berarti task ini belum punya deadline valid (data lama sebelum field ini ada).
+    val deadlineMillis: Long = 0L
 )
