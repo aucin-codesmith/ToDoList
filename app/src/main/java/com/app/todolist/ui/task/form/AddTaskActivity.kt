@@ -16,6 +16,7 @@ import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityAddTaskBinding
 import com.app.todolist.model.TaskItem
 import com.app.todolist.util.CategoryChipHelper
+import com.app.todolist.util.ReminderScheduler
 import com.app.todolist.util.TaskDateFormatter
 import com.google.android.material.chip.Chip
 import kotlinx.coroutines.Dispatchers
@@ -164,13 +165,15 @@ class AddTaskActivity : AppCompatActivity() {
             date = TaskDateFormatter.formatDateShort(deadline),
             priority = selectedPriority,
             assigneeTag = null,
-            isCompleted = false
+            isCompleted = false,
+            deadlineMillis = deadline.timeInMillis
         )
 
         binding.btnSave.isEnabled = false
 
         lifecycleScope.launch(Dispatchers.IO) {
-            TaskRepository.addTaskItem(applicationContext, newTask)
+            val newId = TaskRepository.addTaskItem(applicationContext, newTask)
+            ReminderScheduler.scheduleReminder(applicationContext, newId, deadline.timeInMillis)
             runOnUiThread {
                 Toast.makeText(this@AddTaskActivity, "Tugas berhasil disimpan", Toast.LENGTH_SHORT).show()
                 finish()
