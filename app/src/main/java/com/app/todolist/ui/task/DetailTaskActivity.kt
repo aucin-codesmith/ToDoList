@@ -13,6 +13,7 @@ import android.widget.TextView
 import com.app.todolist.R
 import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.ui.task.form.EditTaskActivity
+import com.app.todolist.util.ReminderScheduler
 import kotlinx.coroutines.launch
 
 class DetailTaskActivity : AppCompatActivity() {
@@ -51,6 +52,7 @@ class DetailTaskActivity : AppCompatActivity() {
     private var currentDeadline  = ""
     private var currentPrioritas = ""
     private var currentDeskripsi = ""
+    private var currentDeadlineMillis: Long = 0L
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -76,6 +78,7 @@ class DetailTaskActivity : AppCompatActivity() {
                     currentPrioritas = task.priority
                     currentDeskripsi = task.description
                     isCompleted      = task.isCompleted
+                    currentDeadlineMillis = task.deadlineMillis
 
                     tvTaskTitle.text = currentTitle
                     tvKategori.text  = currentKategori
@@ -160,6 +163,13 @@ class DetailTaskActivity : AppCompatActivity() {
         // Langsung update di repository agar semua Activity mendapat data terbaru
         lifecycleScope.launch {
             TaskRepository.updateTaskItemCompleted(this@DetailTaskActivity, taskId, isCompleted)
+            if (isCompleted) {
+                // Tugas selesai — tidak perlu diingatkan lagi
+                ReminderScheduler.cancelReminder(this@DetailTaskActivity, taskId)
+            } else {
+                // Dibalik jadi belum selesai — jadwalkan lagi kalau deadline-nya masih di masa depan
+                ReminderScheduler.scheduleReminder(this@DetailTaskActivity, taskId, currentDeadlineMillis)
+            }
         }
         applyStatus(if (isCompleted) "selesai" else "belum_selesai")
         val message = if (isCompleted) "Tugas ditandai selesai" else "Tugas ditandai belum selesai"
@@ -191,6 +201,7 @@ class DetailTaskActivity : AppCompatActivity() {
         // Hapus dari repository agar data konsisten di semua Activity
         lifecycleScope.launch {
             TaskRepository.deleteTaskItem(this@DetailTaskActivity, taskId)
+            ReminderScheduler.cancelReminder(this@DetailTaskActivity, taskId)
             Toast.makeText(this@DetailTaskActivity, "Tugas dihapus", Toast.LENGTH_SHORT).show()
             finish()
         }
