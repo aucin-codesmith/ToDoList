@@ -27,7 +27,8 @@ object TaskRepository {
         date = date,
         priority = priority,
         assigneeTag = assigneeTag,
-        isCompleted = isCompleted
+        isCompleted = isCompleted,
+        deadlineMillis = deadlineMillis
     )
 
     private fun TaskItem.toEntity() = TaskEntity(
@@ -39,7 +40,8 @@ object TaskRepository {
         date = date,
         priority = priority,
         assigneeTag = assigneeTag,
-        isCompleted = isCompleted
+        isCompleted = isCompleted,
+        deadlineMillis = deadlineMillis
     )
 
     // ── Read ──────────────────────────────────────────────────────────────────
@@ -74,9 +76,11 @@ object TaskRepository {
     /**
      * Tambah task baru dari AddTaskActivity.
      * id di-set 0 supaya Room auto-generate id baru (abaikan id yang dikirim).
+     * @return id baru yang di-generate Room — dipakai buat jadwalkan reminder.
      */
-    suspend fun addTaskItem(context: Context, task: TaskItem) {
-        dao(context).insertTask(task.toEntity().copy(id = 0))
+    suspend fun addTaskItem(context: Context, task: TaskItem): Int {
+        val newId = dao(context).insertTask(task.toEntity().copy(id = 0))
+        return newId.toInt()
     }
 
     /** Hapus task — dipanggil dari DetailTaskActivity. */
