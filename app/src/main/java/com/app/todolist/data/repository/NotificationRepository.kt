@@ -112,4 +112,16 @@ object NotificationRepository {
     fun markAllAsRead() {
         notifications.replaceAll { it.copy(isRead = true) }
     }
+
+    /**
+     * Tambah notifikasi baru ke urutan paling atas. Dipanggil dari TaskReminderWorker
+     * saat reminder deadline muncul, supaya kelihatan juga di NotificationListActivity
+     * (bukan cuma di notification tray sistem).
+     */
+    fun addNotification(item: NotificationItem) {
+        notifications.add(0, item)
+    }
+
+    /** Generate id baru yang belum kepakai — dipakai saat bikin NotificationItem baru. */
+    fun nextId(): Int = (notifications.maxOfOrNull { it.id } ?: 0) + 1
 }
