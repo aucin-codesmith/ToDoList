@@ -9,7 +9,7 @@ import com.app.todolist.data.entity.TaskEntity
 import com.app.todolist.data.dao.UserDao
 import com.app.todolist.data.dao.TaskDao
 
-@Database(entities = [User::class, TaskEntity::class], version = 2, exportSchema = false)
+@Database(entities = [User::class, TaskEntity::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
