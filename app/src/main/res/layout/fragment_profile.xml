@@ -49,19 +49,6 @@
                     android:textSize="18sp"
                     android:textColor="@color/primary"
                     android:fontFamily="sans-serif-medium" />
-
-                <ImageView
-                    android:id="@+id/btnSettings"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentEnd="true"
-                    android:src="@drawable/ic_settings"
-                    app:tint="@color/on_surface_variant"
-                    android:contentDescription="Settings"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackgroundBorderless" />
             </RelativeLayout>
 
             <!-- ── Avatar + Name ── -->
@@ -90,36 +77,16 @@
                         android:background="@drawable/bg_avatar_circle" />
                 </FrameLayout>
 
-                <!-- Name + Badge -->
-                <LinearLayout
+                <!-- Name -->
+                <TextView
+                    android:id="@+id/tvProfileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="14dp">
-
-                    <TextView
-                        android:id="@+id/tvProfileName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="aucin"
-                        android:textSize="18sp"
-                        android:textColor="@color/on_surface"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:id="@+id/tvProfileRole"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="KMP ✓"
-                        android:textSize="11sp"
-                        android:textColor="@color/primary"
-                        android:fontFamily="sans-serif-medium"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="3dp"
-                        android:background="@drawable/bg_badge_primary" />
-                </LinearLayout>
+                    android:layout_marginTop="14dp"
+                    android:text="aucin"
+                    android:textSize="18sp"
+                    android:textColor="@color/on_surface"
+                    android:fontFamily="sans-serif-medium" />
 
                 <TextView
                     android:id="@+id/tvProfileEmail"

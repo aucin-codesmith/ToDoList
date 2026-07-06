@@ -22,4 +22,12 @@ interface UserDao {
     // Untuk restore session (auto-login) berdasarkan userId yang tersimpan di SharedPreferences
     @Query("SELECT * FROM user_table WHERE id = :id LIMIT 1")
     suspend fun getUserById(id: Int): User?
+
+    // Untuk fitur Ubah Username
+    @Query("UPDATE user_table SET username = :username WHERE id = :id")
+    suspend fun updateUsername(id: Int, username: String)
+
+    // Untuk fitur Ubah Password
+    @Query("UPDATE user_table SET password = :password WHERE id = :id")
+    suspend fun updatePassword(id: Int, password: String)
 }

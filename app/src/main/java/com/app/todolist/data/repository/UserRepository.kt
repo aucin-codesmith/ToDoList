@@ -3,6 +3,7 @@ package com.app.todolist.data.repository
 import android.content.Context
 import com.app.todolist.data.AppDatabase
 import com.app.todolist.model.UserProfile
+import com.app.todolist.util.PasswordHasher
 import com.app.todolist.util.SessionManager
 
 /**
@@ -55,5 +56,48 @@ object UserRepository {
             email = user.email
         )
         return true
+    }
+
+    /**
+     * Ubah username. Mengecek dulu apakah username baru sudah dipakai user lain.
+     * @return null kalau berhasil, atau pesan error kalau gagal.
+     */
+    suspend fun updateUsername(context: Context, newUsername: String): String? {
+        val user = currentUser ?: return "Sesi tidak ditemukan, silakan login ulang"
+        val trimmed = newUsername.trim()
+
+        if (trimmed.isEmpty()) return "Username tidak boleh kosong"
+        if (trimmed == user.username) return null
+
+        val userDao = AppDatabase.getDatabase(context).userDao()
+        val existing = userDao.getUserByUsername(trimmed)
+        if (existing != null && existing.id != user.id) return "Username sudah dipakai"
+
+        userDao.updateUsername(user.id, trimmed)
+        currentUser = user.copy(
+            username = trimmed,
+            name = trimmed,
+            avatarInitials = trimmed.take(2).uppercase()
+        )
+        return null
+    }
+
+    /**
+     * Ubah password. Mengecek dulu apakah password lama yang dimasukkan cocok
+     * dengan yang tersimpan di Room.
+     * @return null kalau berhasil, atau pesan error kalau gagal.
+     */
+    suspend fun updatePassword(context: Context, oldPassword: String, newPassword: String): String? {
+        val user = currentUser ?: return "Sesi tidak ditemukan, silakan login ulang"
+
+        if (oldPassword.isEmpty()) return "Masukkan password lama"
+        if (newPassword.length < 6) return "Password baru minimal 6 karakter"
+
+        val userDao = AppDatabase.getDatabase(context).userDao()
+        val dbUser = userDao.getUserById(user.id) ?: return "User tidak ditemukan"
+        if (!PasswordHasher.verify(oldPassword, dbUser.password)) return "Password lama salah"
+
+        userDao.updatePassword(user.id, PasswordHasher.hash(newPassword))
+        return null
     }
 }
