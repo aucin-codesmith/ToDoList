@@ -20,6 +20,7 @@ import com.app.todolist.ui.task.form.AddTaskActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.app.todolist.util.SessionManager
 
 class TaskListFragment : Fragment() {
 
@@ -99,7 +100,9 @@ class TaskListFragment : Fragment() {
 
     private fun loadTasks() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val tasks = TaskRepository.getTaskItems(requireContext())
+            val currentUserId = SessionManager.getUserId(requireContext())?.toString() ?: "0"
+            val tasks = TaskRepository.getTaskItems(requireContext(), currentUserId)
+
             withContext(Dispatchers.Main) {
                 allTasks = tasks
                 applyFilterAndSearch()

@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName
 data class TaskResponse(
     @SerializedName("id")
     val id: Int,
+    @SerializedName("userId")
+    val userId: String,
     @SerializedName("title")
     val title: String,
     @SerializedName("description")

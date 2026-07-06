@@ -66,9 +66,11 @@ class ProfileFragment : Fragment() {
     }
 
     private suspend fun updateStats() {
-        val total     = TaskRepository.getTotalCount(requireContext())
-        val completed = TaskRepository.getCompletedCount(requireContext())
-        val active    = TaskRepository.getRemainingCount(requireContext())
+        val currentUserId = SessionManager.getUserId(requireContext())?.toString() ?: "0"
+
+        val total     = TaskRepository.getTotalCount(requireContext(), currentUserId)
+        val completed = TaskRepository.getCompletedCount(requireContext(), currentUserId)
+        val active    = TaskRepository.getRemainingCount(requireContext(), currentUserId)
 
         binding.tvStatTotal.text     = total.toString()
         binding.tvStatCompleted.text = completed.toString()

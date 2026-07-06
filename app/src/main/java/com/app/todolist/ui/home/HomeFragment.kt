@@ -19,6 +19,7 @@ import com.app.todolist.ui.auth.LoginActivity
 import com.app.todolist.ui.notification.NotificationListActivity
 import com.app.todolist.ui.task.form.AddTaskActivity
 import kotlinx.coroutines.launch
+import com.app.todolist.util.SessionManager
 
 class HomeFragment : Fragment() {
 
@@ -40,7 +41,6 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            // Coba pulihkan sesi (dari memory atau SharedPreferences+Room)
             val hasSession = UserRepository.restoreSessionIfNeeded(requireContext())
             if (!hasSession) {
                 startActivity(Intent(requireContext(), LoginActivity::class.java))
@@ -48,8 +48,12 @@ class HomeFragment : Fragment() {
                 return@launch
             }
 
+            // Ambil ID User di sini
+            val currentUserId = SessionManager.getUserId(requireContext())?.toString() ?: "0"
+
             setupUserGreeting()
-            setupRecyclerView(TaskRepository.getRecentTasks(requireContext()))
+            // Masukkan currentUserId ke fungsi getRecentTasks
+            setupRecyclerView(TaskRepository.getRecentTasks(requireContext(), currentUserId))
             updateSummaryCard()
             setupClickListeners()
         }
@@ -57,12 +61,12 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Guard: onViewCreated berjalan async, jadi onResume bisa terpanggil duluan
         if (!::taskAdapter.isInitialized) return
 
         viewLifecycleOwner.lifecycleScope.launch {
-            // Refresh data dari repository saat kembali dari halaman lain
-            taskAdapter.updateTasks(TaskRepository.getRecentTasks(requireContext()))
+            val currentUserId = SessionManager.getUserId(requireContext())?.toString() ?: "0"
+            // Masukkan currentUserId ke sini
+            taskAdapter.updateTasks(TaskRepository.getRecentTasks(requireContext(), currentUserId))
             updateSummaryCard()
             updateNotifBadge()
         }
@@ -96,9 +100,12 @@ class HomeFragment : Fragment() {
     // ── Summary card ──────────────────────────────────────────────────────────
 
     private suspend fun updateSummaryCard() {
-        val total = TaskRepository.getTotalCount(requireContext())
-        val completed = TaskRepository.getCompletedCount(requireContext())
-        val remaining = TaskRepository.getRemainingCount(requireContext())
+        val currentUserId = SessionManager.getUserId(requireContext())?.toString() ?: "0"
+
+        // Masukkan currentUserId ke ketiga fungsi ini
+        val total = TaskRepository.getTotalCount(requireContext(), currentUserId)
+        val completed = TaskRepository.getCompletedCount(requireContext(), currentUserId)
+        val remaining = TaskRepository.getRemainingCount(requireContext(), currentUserId)
 
         binding.tvTaskCount.text = "$total Tugas Hari Ini"
         binding.tvTaskProgress.text = "$completed selesai · $remaining tersisa"

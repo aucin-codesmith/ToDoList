@@ -22,6 +22,7 @@ import com.google.android.material.chip.Chip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import com.app.todolist.util.SessionManager
 
 class AddTaskActivity : AppCompatActivity() {
 
@@ -156,8 +157,12 @@ class AddTaskActivity : AppCompatActivity() {
         }
         if (!isValid || deadline == null) return
 
+        // --- TAMBAHKAN BARIS INI UNTUK AMBIL ID USER ---
+        val currentUserId = SessionManager.getUserId(this)?.toString() ?: "0"
+
         val newTask = TaskItem(
-            id = 0, // diabaikan, Room yang generate id
+            id = 0,
+            userId = currentUserId, // <--- SISIPKAN DI SINI
             title = title,
             category = getSelectedCategory(),
             description = description,

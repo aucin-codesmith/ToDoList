@@ -13,6 +13,7 @@ package com.app.todolist.model
  */
 data class TaskItem(
     val id: Int,
+    val userId: String,
     val title: String,
     val category: String,
     val description: String,

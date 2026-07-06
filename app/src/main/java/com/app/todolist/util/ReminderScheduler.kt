@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.app.todolist.data.repository.TaskRepository
 import java.util.concurrent.TimeUnit
+import com.app.todolist.util.SessionManager
 
 /**
  * "Cron job"-nya task reminder — tapi berbasis WorkManager, bukan alarm exact.
@@ -62,7 +63,10 @@ object ReminderScheduler {
      * ulang pakai offset baru; task yang sudah selesai/lewat deadline dibatalkan.
      */
     suspend fun rescheduleAllReminders(context: Context) {
-        val tasks = TaskRepository.getTaskItems(context)
+        // --- AMBIL ID USER DAN MASUKKAN KE FUNGSI GET ---
+        val currentUserId = SessionManager.getUserId(context)?.toString() ?: "0"
+        val tasks = TaskRepository.getTaskItems(context, currentUserId)
+
         tasks.forEach { task ->
             if (!task.isCompleted && task.deadlineMillis > System.currentTimeMillis()) {
                 scheduleReminder(context, task.id, task.deadlineMillis)
