@@ -1,127 +1,87 @@
 package com.app.todolist.data.repository
 
+import android.content.Context
+import com.app.todolist.data.AppDatabase
+import com.app.todolist.data.entity.NotificationEntity
 import com.app.todolist.model.NotificationItem
 import com.app.todolist.model.NotifType
 
 /**
- * NotificationRepository — single source of truth untuk semua data notifikasi.
+ * NotificationRepository — sudah persisted ke SQLite via Room (bukan dummy
+ * in-memory lagi). Tidak ada seed data dummy sama sekali — semua notifikasi
+ * yang tampil murni berasal dari kejadian nyata di app, misalnya reminder
+ * deadline dari TaskReminderWorker.
  *
- * Notifikasi yang memiliki task terkait (DEADLINE, REMINDER, DONE) menyimpan [taskId]
- * yang dapat di-resolve ke [TaskItem] melalui [TaskRepository.getTaskItemById].
- *
- * Digunakan oleh:
- *  - NotificationListActivity
- *  - DetailNotificationActivity
- *
- * Ganti implementasi ini dengan Room / API call saat integrasi backend.
+ * Semua fungsi jadi `suspend` karena akses database. Panggil dari
+ * lifecycleScope.launch { } di Activity, JANGAN dari Main thread langsung.
  */
 object NotificationRepository {
 
-    private val notifications = mutableListOf(
-        // ── Notif 1 — DEADLINE → Task 1 (Desain Prototipe Mobile App) ──────────
-        NotificationItem(
-            id            = 1,
-            title         = "Tugas Segera Berakhir",
-            body          = "Selesaikan \"Desain Prototipe Mobile App\" sebelum jam 14:00 hari ini.",
-            bodyHighlight = "\"Desain Prototipe Mobile App\"",
-            time          = "5 mnt yang lalu",
-            type          = NotifType.DEADLINE,
-            isRead        = false,
-            taskId        = 1,
-            taskCategory  = "Design",
-            taskDeadline  = "Hari ini, 14:00",
-            taskPriority  = "Tinggi"
-        ),
-        // ── Notif 2 — REMINDER → Task 4 (Daily Standup Meeting) ────────────────
-        NotificationItem(
-            id            = 2,
-            title         = "Pengingat Harian",
-            body          = "Jangan lupa \"Daily Standup Meeting\" dimulai jam 09:00 hari ini.",
-            bodyHighlight = "\"Daily Standup Meeting\"",
-            time          = "2 jam yang lalu",
-            type          = NotifType.REMINDER,
-            isRead        = false,
-            taskId        = 4,
-            taskCategory  = "Work",
-            taskDeadline  = "Hari ini, 09:00",
-            taskPriority  = "Sedang"
-        ),
-        // ── Notif 3 — DONE → Task 2 (Review Laporan Mingguan) ──────────────────
-        NotificationItem(
-            id            = 3,
-            title         = "Tugas Selesai",
-            body          = "\"Review Laporan Mingguan\" telah ditandai sebagai selesai oleh Anda.",
-            bodyHighlight = "\"Review Laporan Mingguan\"",
-            time          = "Kemarin",
-            type          = NotifType.DONE,
-            isRead        = true,
-            taskId        = 2,
-            taskCategory  = "Management",
-            taskDeadline  = "Kemarin, 09:00",
-            taskPriority  = "Sedang"
-        ),
-        // ── Notif 4 — DEADLINE → Task 5 (Persiapan Presentasi Klien) ───────────
-        NotificationItem(
-            id            = 4,
-            title         = "Deadline Mendekat",
-            body          = "\"Persiapan Presentasi Klien\" jatuh tempo lusa, 13:00.",
-            bodyHighlight = "\"Persiapan Presentasi Klien\"",
-            time          = "1 jam yang lalu",
-            type          = NotifType.DEADLINE,
-            isRead        = false,
-            taskId        = 5,
-            taskCategory  = "Work",
-            taskDeadline  = "Lusa, 13:00",
-            taskPriority  = "Tinggi"
-        ),
-        // ── Notif 5 — SYSTEM — tidak punya task terkait ─────────────────────────
-        NotificationItem(
-            id            = 5,
-            title         = "Pembaruan Sistem",
-            body          = "Versi 2.1.0 telah tersedia dengan perbaikan bug sinkronisasi cloud.",
-            bodyHighlight = "",
-            time          = "2 hari yang lalu",
-            type          = NotifType.SYSTEM,
-            isRead        = true,
-            taskId        = null
-        )
+    private fun dao(context: Context) = AppDatabase.getDatabase(context).notificationDao()
+
+    // ── Mapper: NotificationEntity (Room) <-> NotificationItem (UI model) ──────
+
+    private fun NotificationEntity.toItem() = NotificationItem(
+        id = id,
+        title = title,
+        body = body,
+        bodyHighlight = bodyHighlight,
+        time = time,
+        type = NotifType.valueOf(type),
+        isRead = isRead,
+        taskId = taskId,
+        taskCategory = taskCategory,
+        taskDeadline = taskDeadline,
+        taskPriority = taskPriority
+    )
+
+    private fun NotificationItem.toEntity() = NotificationEntity(
+        id = id,
+        title = title,
+        body = body,
+        bodyHighlight = bodyHighlight,
+        time = time,
+        type = type.name,
+        isRead = isRead,
+        taskId = taskId,
+        taskCategory = taskCategory,
+        taskDeadline = taskDeadline,
+        taskPriority = taskPriority
     )
 
     // ── Read ──────────────────────────────────────────────────────────────────
 
-    /** Semua notifikasi — dipakai NotificationListActivity. */
-    fun getNotifications(): MutableList<NotificationItem> = notifications
+    /** Semua notifikasi (terbaru duluan) — dipakai NotificationListActivity. */
+    suspend fun getNotifications(context: Context): List<NotificationItem> =
+        dao(context).getAllNotifications().map { it.toItem() }
 
-    /** Cari satu notifikasi berdasarkan id — dipakai DetailNotificationActivity. */
-    fun getNotificationById(id: Int): NotificationItem? = notifications.find { it.id == id }
+    /** Cari satu notifikasi berdasarkan id — dipakai DetailNotificationActivity/NotificationListActivity. */
+    suspend fun getNotificationById(context: Context, id: Int): NotificationItem? =
+        dao(context).getNotificationById(id)?.toItem()
 
-    /** Jumlah notifikasi yang belum dibaca — dipakai HomeActivity badge. */
-    fun getUnreadCount(): Int = notifications.count { !it.isRead }
+    /** Jumlah notifikasi yang belum dibaca — dipakai badge di HomeFragment. */
+    suspend fun getUnreadCount(context: Context): Int =
+        dao(context).getUnreadCount()
 
     // ── Write ─────────────────────────────────────────────────────────────────
 
     /** Tandai notifikasi sebagai sudah dibaca. */
-    fun markAsRead(id: Int) {
-        val idx = notifications.indexOfFirst { it.id == id }
-        if (idx != -1) {
-            notifications[idx] = notifications[idx].copy(isRead = true)
-        }
+    suspend fun markAsRead(context: Context, id: Int) {
+        dao(context).markAsRead(id)
     }
 
     /** Tandai semua notifikasi sebagai sudah dibaca. */
-    fun markAllAsRead() {
-        notifications.replaceAll { it.copy(isRead = true) }
+    suspend fun markAllAsRead(context: Context) {
+        dao(context).markAllAsRead()
     }
 
     /**
-     * Tambah notifikasi baru ke urutan paling atas. Dipanggil dari TaskReminderWorker
-     * saat reminder deadline muncul, supaya kelihatan juga di NotificationListActivity
+     * Tambah notifikasi baru. Dipanggil dari TaskReminderWorker saat reminder
+     * deadline muncul, supaya kelihatan juga di NotificationListActivity
      * (bukan cuma di notification tray sistem).
+     * id di-set 0 supaya Room auto-generate id baru.
      */
-    fun addNotification(item: NotificationItem) {
-        notifications.add(0, item)
+    suspend fun addNotification(context: Context, item: NotificationItem) {
+        dao(context).insertNotification(item.toEntity().copy(id = 0))
     }
-
-    /** Generate id baru yang belum kepakai — dipakai saat bikin NotificationItem baru. */
-    fun nextId(): Int = (notifications.maxOfOrNull { it.id } ?: 0) + 1
 }
