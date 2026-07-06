@@ -6,14 +6,21 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.app.todolist.data.entity.User
 import com.app.todolist.data.entity.TaskEntity
+import com.app.todolist.data.entity.NotificationEntity
 import com.app.todolist.data.dao.UserDao
 import com.app.todolist.data.dao.TaskDao
+import com.app.todolist.data.dao.NotificationDao
 
-@Database(entities = [User::class, TaskEntity::class], version = 3, exportSchema = false)
+@Database(
+    entities = [User::class, TaskEntity::class, NotificationEntity::class],
+    version = 4,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
     abstract fun taskDao(): TaskDao
+    abstract fun notificationDao(): NotificationDao
 
     companion object {
         @Volatile
