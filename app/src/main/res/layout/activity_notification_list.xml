@@ -127,81 +127,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="4dp"
+                android:paddingBottom="16dp"
                 android:nestedScrollingEnabled="false"
                 android:clipToPadding="false" />
-
-            <!-- ── Promo Card "Tetap Teratur" ── -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/card_promo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="16dp"
-                android:background="@drawable/bg_promo_card"
-                android:padding="24dp"
-                android:clipChildren="false">
-
-                <!-- Flash icon decoration (bottom right) -->
-                <ImageView
-                    android:id="@+id/iv_flash_deco"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:src="@drawable/ic_flash"
-                    android:alpha="0.25"
-                    android:contentDescription="@null"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginEnd="-8dp"
-                    android:layout_marginBottom="-8dp" />
-
-                <!-- Title -->
-                <TextView
-                    android:id="@+id/tv_promo_title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Tetap Teratur"
-                    android:textColor="@color/white"
-                    android:textSize="22sp"
-                    android:fontFamily="sans-serif-black"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/iv_flash_deco"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Body -->
-                <TextView
-                    android:id="@+id/tv_promo_body"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Aktifkan pengingat cerdas untuk mendapatkan peringatan tugas 15 menit sebelumnya."
-                    android:textColor="#E0D6FF"
-                    android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.4"
-                    android:fontFamily="sans-serif"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/iv_flash_deco"
-                    app:layout_constraintTop_toBottomOf="@id/tv_promo_title" />
-
-                <!-- CTA Button -->
-                <TextView
-                    android:id="@+id/btn_promo_action"
-                    android:layout_width="wrap_content"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="20dp"
-                    android:paddingHorizontal="24dp"
-                    android:text="Aktifkan Sekarang"
-                    android:gravity="center"
-                    android:textColor="@color/primary"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:background="@drawable/bg_promo_button"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_promo_body" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
