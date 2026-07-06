@@ -48,7 +48,7 @@ class TaskReminderWorker(
     }
 
     /** Simpan juga ke NotificationRepository supaya kelihatan di NotificationListActivity. */
-    private fun saveToNotificationList(
+    private suspend fun saveToNotificationList(
         taskId: Int,
         taskTitle: String,
         taskCategory: String,
@@ -56,7 +56,7 @@ class TaskReminderWorker(
         taskPriority: String
     ) {
         val notifItem = NotificationItem(
-            id = NotificationRepository.nextId(),
+            id = 0, // diabaikan, Room yang generate id
             title = "Pengingat Deadline",
             body = "Jangan lupa \"$taskTitle\" deadline $taskDeadline.",
             bodyHighlight = "\"$taskTitle\"",
@@ -68,7 +68,7 @@ class TaskReminderWorker(
             taskDeadline = taskDeadline,
             taskPriority = taskPriority
         )
-        NotificationRepository.addNotification(notifItem)
+        NotificationRepository.addNotification(applicationContext, notifItem)
     }
 
     private fun showNotification(taskId: Int, title: String, deadlineText: String) {
