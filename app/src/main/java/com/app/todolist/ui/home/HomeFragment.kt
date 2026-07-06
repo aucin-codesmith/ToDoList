@@ -107,8 +107,8 @@ class HomeFragment : Fragment() {
 
     // ── Notification badge ────────────────────────────────────────────────────
 
-    private fun updateNotifBadge() {
-        val unread = NotificationRepository.getUnreadCount()
+    private suspend fun updateNotifBadge() {
+        val unread = NotificationRepository.getUnreadCount(requireContext())
         // Tampilkan badge jika ada notif belum dibaca
         // binding.badgeNotif?.visibility = if (unread > 0) View.VISIBLE else View.GONE
         // binding.badgeNotif?.text       = unread.toString()
