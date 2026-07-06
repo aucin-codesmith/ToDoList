@@ -16,6 +16,7 @@ import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.model.NotificationItem
 import com.app.todolist.model.NotifType
 import com.app.todolist.ui.task.DetailTaskActivity
+import com.app.todolist.util.SessionManager
 
 /**
  * Dijalankan sekali oleh WorkManager persis di waktu reminder yang dihitung
@@ -40,8 +41,21 @@ class TaskReminderWorker(
         // Task sudah dihapus, atau sudah ditandai selesai duluan — tidak perlu diingatkan lagi
         if (task == null || task.isCompleted) return Result.success()
 
+        // --- TAMBAHAN UNTUK MULTI-USER ---
+        // Cek siapa yang sedang login saat ini
+        val currentUserId = SessionManager.getUserId(applicationContext)?.toString() ?: "0"
+
+        // Jika yang sedang login bukan pemilik tugas ini, batalkan notifikasinya!
+        if (task.userId != currentUserId) {
+            return Result.success()
+        }
+        // ---------------------------------
+
         NotificationHelper.ensureChannel(applicationContext)
         showNotification(task.id, task.title, task.dateTime)
+
+        // Catatan: Jika temanmu menambahkan kolom userId juga di NotificationItem (Soal 6),
+        // pastikan kamu juga menyelipkan userId ke dalam fungsi saveToNotificationList ini nanti.
         saveToNotificationList(task.id, task.title, task.category, task.dateTime, task.priority)
 
         return Result.success()
