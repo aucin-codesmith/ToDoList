@@ -20,5 +20,8 @@ data class TaskItem(
     val date: String,                // format "14 Okt, 2023"   — dipakai TaskAdapter (Home)
     val priority: String = "Sedang", // "Tinggi" | "Sedang" | "Rendah"
     val assigneeTag: String? = null,
-    var isCompleted: Boolean = false
+    var isCompleted: Boolean = false,
+    // Timestamp asli (epoch millis) dari deadline — dipakai ReminderScheduler.
+    // 0L berarti belum punya deadline valid.
+    val deadlineMillis: Long = 0L
 )

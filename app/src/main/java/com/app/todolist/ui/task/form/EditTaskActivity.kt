@@ -12,6 +12,7 @@ import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.databinding.ActivityEditTaskBinding
 import com.app.todolist.model.TaskItem
 import com.app.todolist.util.CategoryChipHelper
+import com.app.todolist.util.ReminderScheduler
 import com.app.todolist.util.TaskDateFormatter
 import com.google.android.material.chip.Chip
 import kotlinx.coroutines.Dispatchers
@@ -226,11 +227,13 @@ class EditTaskActivity : AppCompatActivity() {
         val category = getSelectedCategory()
 
         // Kalau user tidak ganti deadline (selectedDeadlineCalendar null),
-        // pertahankan date/dateTime yang lama apa adanya.
+        // pertahankan date/dateTime/deadlineMillis yang lama apa adanya.
         val newDate = selectedDeadlineCalendar?.let { TaskDateFormatter.formatDateShort(it) }
             ?: original.date
         val newDateTime = selectedDeadlineCalendar?.let { TaskDateFormatter.formatDateTimeRelative(it) }
             ?: original.dateTime
+        val newDeadlineMillis = selectedDeadlineCalendar?.timeInMillis
+            ?: original.deadlineMillis
 
         val updated = original.copy(
             title = title,
@@ -238,13 +241,22 @@ class EditTaskActivity : AppCompatActivity() {
             category = category,
             priority = selectedPriority,
             date = newDate,
-            dateTime = newDateTime
+            dateTime = newDateTime,
+            deadlineMillis = newDeadlineMillis
         )
 
         binding.btnSave.isEnabled = false
 
         lifecycleScope.launch(Dispatchers.IO) {
             TaskRepository.updateTaskItem(applicationContext, updated)
+            // Deadline mungkin berubah — jadwalkan ulang remindernya (otomatis
+            // dibatalkan di dalam scheduleReminder kalau task ini isCompleted atau
+            // deadline sudah lewat)
+            if (updated.isCompleted) {
+                ReminderScheduler.cancelReminder(applicationContext, updated.id)
+            } else {
+                ReminderScheduler.scheduleReminder(applicationContext, updated.id, updated.deadlineMillis)
+            }
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@EditTaskActivity, "Tugas berhasil diperbarui", Toast.LENGTH_SHORT).show()
                 finish() // kembali ke DetailTaskActivity

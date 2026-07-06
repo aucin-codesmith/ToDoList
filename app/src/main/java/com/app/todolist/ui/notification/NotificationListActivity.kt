@@ -3,7 +3,6 @@ package com.app.todolist.ui.notification
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,14 +32,13 @@ class NotificationListActivity : AppCompatActivity() {
         setupToolbar()
         setupRecyclerView()
         setupFilters()
-        setupPromoCard()
         setupBottomNav()
-        applyFilter()
+        lifecycleScope.launch { applyFilter() }
     }
 
     override fun onResume() {
         super.onResume()
-        applyFilter()
+        lifecycleScope.launch { applyFilter() }
     }
 
     private fun setupToolbar() {
@@ -49,10 +47,12 @@ class NotificationListActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         adapter = NotificationAdapter(mutableListOf()) { notif ->
-            // Tandai sudah dibaca lalu buka detail
-            NotificationRepository.markAsRead(notif.id)
-            applyFilter()
-            lifecycleScope.launch { openDetailNotification(notif.id) }
+            lifecycleScope.launch {
+                // Tandai sudah dibaca lalu buka detail
+                NotificationRepository.markAsRead(this@NotificationListActivity, notif.id)
+                applyFilter()
+                openDetailNotification(notif.id)
+            }
         }
         binding.rvNotifications.apply {
             layoutManager            = LinearLayoutManager(this@NotificationListActivity)
@@ -62,7 +62,7 @@ class NotificationListActivity : AppCompatActivity() {
     }
 
     private suspend fun openDetailNotification(notifId: Int) {
-        val notif   = NotificationRepository.getNotificationById(notifId) ?: return
+        val notif   = NotificationRepository.getNotificationById(this, notifId) ?: return
         val hasTask = notif.type == NotifType.DEADLINE ||
                 notif.type == NotifType.REMINDER ||
                 notif.type == NotifType.DONE
@@ -101,7 +101,7 @@ class NotificationListActivity : AppCompatActivity() {
     private fun selectFilter(type: FilterType) {
         currentFilter = type
         updateFilterUI()
-        applyFilter()
+        lifecycleScope.launch { applyFilter() }
     }
 
     private fun updateFilterUI() {
@@ -121,8 +121,8 @@ class NotificationListActivity : AppCompatActivity() {
         }
     }
 
-    private fun applyFilter() {
-        val filtered = NotificationRepository.getNotifications().filter { notif ->
+    private suspend fun applyFilter() {
+        val filtered = NotificationRepository.getNotifications(this).filter { notif ->
             when (currentFilter) {
                 FilterType.ALL    -> true
                 FilterType.UNREAD -> !notif.isRead
@@ -130,12 +130,6 @@ class NotificationListActivity : AppCompatActivity() {
             }
         }
         adapter.updateItems(filtered)
-    }
-
-    private fun setupPromoCard() {
-        binding.btnPromoAction.setOnClickListener {
-            Toast.makeText(this, "Mengaktifkan pengingat cerdas...", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun setupBottomNav() {

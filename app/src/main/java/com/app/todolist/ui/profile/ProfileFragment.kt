@@ -13,6 +13,7 @@ import com.app.todolist.data.repository.TaskRepository
 import com.app.todolist.data.repository.UserRepository
 import com.app.todolist.databinding.FragmentProfileBinding
 import com.app.todolist.ui.auth.LoginActivity
+import com.app.todolist.util.NotificationSettingsDialog
 import com.app.todolist.util.SessionManager
 import kotlinx.coroutines.launch
 
@@ -86,7 +87,7 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnNotifications.setOnClickListener {
-            Toast.makeText(requireContext(), "Notifikasi", Toast.LENGTH_SHORT).show()
+            NotificationSettingsDialog.show(requireContext(), viewLifecycleOwner.lifecycleScope)
         }
 
         binding.btnChangeUsername.setOnClickListener {

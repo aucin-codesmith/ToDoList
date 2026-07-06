@@ -14,22 +14,24 @@ object TaskRepository {
 
     // --- Mappers ---
 
+    // Menggabungkan deadlineMillis milik temanmu ke dalam mapper UI <-> Entity
     private fun TaskEntity.toTaskItem() = TaskItem(
         id = id, title = title, category = category, description = description,
         dateTime = dateTime, date = date, priority = priority, assigneeTag = assigneeTag,
-        isCompleted = isCompleted
+        isCompleted = isCompleted, deadlineMillis = deadlineMillis
     )
 
     private fun TaskItem.toEntity() = TaskEntity(
         id = id, title = title, category = category, description = description,
         dateTime = dateTime, date = date, priority = priority, assigneeTag = assigneeTag,
-        isCompleted = isCompleted
+        isCompleted = isCompleted, deadlineMillis = deadlineMillis
     )
 
+    // Mapper khusus API tidak butuh deadlineMillis (karena server MockAPI tidak memintanya)
     private fun TaskResponse.toEntity() = TaskEntity(
         id = id, title = title, category = category, description = description,
         dateTime = dateTime, date = date, priority = priority, assigneeTag = null,
-        isCompleted = isCompleted
+        isCompleted = isCompleted, deadlineMillis = 0L
     )
 
     private fun TaskItem.toResponse() = TaskResponse(
@@ -65,18 +67,23 @@ object TaskRepository {
 
     // --- Write ---
 
-    suspend fun addTaskItem(context: Context, task: TaskItem) {
+    // Menggabungkan fitur kembalikan ID (Int) milik temanmu dengan fitur API POST milikmu
+    suspend fun addTaskItem(context: Context, task: TaskItem): Int {
+        var localId = 0L
         try {
             val response = ApiClient.instance.addTask(task.toResponse())
             if (response.isSuccessful && response.body() != null) {
-                dao(context).insertTask(response.body()!!.toEntity())
+                // Simpan balasan server dengan ID resmi ke lokal, sertakan juga deadlineMillis
+                val entityToSave = response.body()!!.toEntity().copy(deadlineMillis = task.deadlineMillis)
+                localId = dao(context).insertTask(entityToSave)
             } else {
-                dao(context).insertTask(task.toEntity().copy(id = 0))
+                localId = dao(context).insertTask(task.toEntity().copy(id = 0))
             }
         } catch (e: Exception) {
             Log.e("API_SYNC", "Offline/Error POST: ${e.message}")
-            dao(context).insertTask(task.toEntity().copy(id = 0))
+            localId = dao(context).insertTask(task.toEntity().copy(id = 0))
         }
+        return localId.toInt() // Mengembalikan ID untuk digunakan oleh AlarmManager
     }
 
     suspend fun deleteTaskItem(context: Context, id: Int) {

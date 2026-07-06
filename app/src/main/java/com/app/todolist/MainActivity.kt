@@ -1,14 +1,20 @@
 package com.app.todolist
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.app.todolist.databinding.ActivityMainBinding
 import com.app.todolist.ui.home.HomeFragment
 import com.app.todolist.ui.profile.ProfileFragment
 import com.app.todolist.ui.task.TaskListFragment
 import com.app.todolist.ui.task.form.AddTaskActivity
+import com.app.todolist.util.NotificationHelper
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,10 +26,16 @@ class MainActivity : AppCompatActivity() {
         const val EXTRA_SELECTED_TAB = "extra_selected_tab"
     }
 
+    private val requestNotificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* diamkan hasilnya baik granted/denied — reminder cuma skip kalau ditolak */ }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        NotificationHelper.ensureChannel(this)
+        requestNotificationPermissionIfNeeded()
 
         if (savedInstanceState == null) {
             val requestedTab = intent.getIntExtra(EXTRA_SELECTED_TAB, R.id.nav_home)
@@ -44,6 +56,17 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_profile -> { showTab(R.id.nav_profile); true }
                 else -> false
+            }
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                this, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted) {
+                requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
     }
